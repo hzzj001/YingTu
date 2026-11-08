@@ -128,7 +128,9 @@ public class ImgUtil {
         TextDrawable.Builder builder = new TextDrawable.Builder();
         text = TextUtils.isEmpty(text) ? "！" : text.substring(0, 1);
         if (vod) builder.buildRect(text, ColorGenerator.get400(text));
-        return builder.buildRoundRect(text, ColorGenerator.get400(text), ResUtil.dp2px(4));
+        // 第 25 轮：fork 自带的 TextDrawable 替身不是 Drawable（真库才是），直接返回它会编译失败；
+        // 改返回替身自带的 toShapeDrawable()（GradientDrawable，本身就是 Drawable）。占位图仍是纯色块。
+        return builder.buildRoundRect(text, ColorGenerator.get400(text), ResUtil.dp2px(4)).toShapeDrawable();
     }
 
     private static RequestListener<Drawable> getListener(String text, String url, ImageView view, boolean vod) {

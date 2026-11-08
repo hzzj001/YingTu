@@ -15,6 +15,8 @@
     <!-- PlayerView 自定义属性 -->
     <declare-styleable name="PlayerView">
         <attr name="use_controller" format="boolean" />
+        <!-- 补：Player 样式里用到的 use_artwork，上游靠 media3-ui 库自带，本地无该库依赖，故在此声明（与 use_controller / resize_mode 同一做法） -->
+        <attr name="use_artwork" format="boolean" />
         <attr name="surface_type" format="enum">
             <enum name="surface_view" value="0" />
             <enum name="texture_view" value="1" />

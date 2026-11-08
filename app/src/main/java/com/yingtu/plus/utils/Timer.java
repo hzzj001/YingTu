@@ -1,23 +1,91 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/mobile/java/com/fongmi/android/tv/utils/Timer.java
 package com.yingtu.plus.utils;
 
-/**
- * 兼容实现，待上游 webhtv 源码对齐。
- *
- * 播放计时器（单例）：VideoActivity 在重播 / 切集时重置计时。
- * 兼容实现只保留调用点用到的接口，reset() 为无操作。
- */
-public final class Timer {
+import android.content.Intent;
+import android.os.CountDownTimer;
 
-    private static final Timer INSTANCE = new Timer();
+import com.yingtu.plus.App;
+import com.yingtu.plus.event.ActionEvent;
+import com.yingtu.plus.service.PlaybackService;
 
-    private Timer() {
+import java.util.concurrent.TimeUnit;
+
+public class Timer {
+
+    private CountDownTimer timer;
+    private Callback callback;
+    private long tick;
+
+    private static class Loader {
+        static volatile Timer INSTANCE = new Timer();
     }
 
     public static Timer get() {
-        return INSTANCE;
+        return Loader.INSTANCE;
     }
 
-    /** 重置计时（兼容实现：不做任何事）。 */
+    public boolean isRunning() {
+        return timer != null;
+    }
+
+    public void setCallback(Callback callback) {
+        this.callback = callback;
+    }
+
+    public long getTick() {
+        return tick;
+    }
+
+    public void set(long t) {
+        timer = new CountDownTimer(t, 1000) {
+            @Override
+            public void onTick(long tick) {
+                Timer.this.onTick(tick);
+            }
+
+            @Override
+            public void onFinish() {
+                Timer.this.onFinish();
+            }
+        }.start();
+    }
+
+    private void onTick(long tick) {
+        this.tick = tick;
+        if (callback != null) callback.onTick(tick);
+    }
+
+    private void onFinish() {
+        if (callback != null) callback.onFinish();
+        if (PlaybackService.isRunning()) sendPause();
+        reset();
+    }
+
+    private void sendPause() {
+        Intent intent = new Intent(App.get(), PlaybackService.class);
+        intent.setAction(ActionEvent.PAUSE);
+        App.get().startService(intent);
+    }
+
+    public void delay() {
+        cancel();
+        set(TimeUnit.MINUTES.toMillis(5) + tick);
+    }
+
     public void reset() {
+        tick = 0;
+        cancel();
+    }
+
+    public void cancel() {
+        if (timer != null) timer.cancel();
+        timer = null;
+    }
+
+    public interface Callback {
+
+        void onTick(long tick);
+
+        void onFinish();
     }
 }

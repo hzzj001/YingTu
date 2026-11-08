@@ -1,5 +1,7 @@
 package com.yingtu.plus.playback;
 
+import androidx.annotation.Nullable;
+
 import com.yingtu.plus.bean.History;
 import com.yingtu.plus.player.PlayerManager;
 
@@ -31,5 +33,18 @@ public final class PlaybackEventCollector {
 
     /** 播放停止（兼容实现：不做任何事）。 */
     public void onStop(PlayerManager player) {
+    }
+
+    // 第 21 轮：以下 4 个方法照抄上游签名（空实现，与现有兼容实现行为一致，不触发 webhook）。
+    public void setPlayer(@Nullable PlayerManager player) {
+    }
+
+    public synchronized void onPlaybackStateChanged(@Nullable PlayerManager player, int state) {
+    }
+
+    public synchronized void onIsPlayingChanged(@Nullable PlayerManager player, boolean isPlaying) {
+    }
+
+    public void onHistoryDeleted(PlaybackProgressDeleteInput input, int cid) {
     }
 }

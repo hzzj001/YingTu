@@ -54,6 +54,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import com.yingtu.plus.viewmodel.ReflectiveViewModelFactory;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
@@ -744,19 +745,18 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
 
     private void configureAudioLandscapeActions() {
         if (mBinding == null || !ResUtil.isLand(this)) return;
-        if (mBinding.audioTransport instanceof LinearLayoutCompat transport) {
-            for (int i = 0; i < transport.getChildCount(); i++) {
-                View child = transport.getChildAt(i);
-                if (!(child instanceof ViewGroup group)) continue;
-                for (int j = 0; j < group.getChildCount(); j++) {
-                    View item = group.getChildAt(j);
-                    if (item instanceof TextView) item.setVisibility(View.GONE);
-                    else if (item instanceof ImageView) {
-                        ViewGroup.LayoutParams params = item.getLayoutParams();
-                        params.width = ResUtil.dp2px(40);
-                        params.height = ResUtil.dp2px(40);
-                        item.setLayoutParams(params);
-                    }
+        LinearLayoutCompat transport = mBinding.audioTransport;
+        for (int i = 0; i < transport.getChildCount(); i++) {
+            View child = transport.getChildAt(i);
+            if (!(child instanceof ViewGroup group)) continue;
+            for (int j = 0; j < group.getChildCount(); j++) {
+                View item = group.getChildAt(j);
+                if (item instanceof TextView) item.setVisibility(View.GONE);
+                else if (item instanceof ImageView) {
+                    ViewGroup.LayoutParams params = item.getLayoutParams();
+                    params.width = ResUtil.dp2px(40);
+                    params.height = ResUtil.dp2px(40);
+                    item.setLayoutParams(params);
                 }
             }
         }
@@ -1234,7 +1234,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
     }
 
     private void setViewModel() {
-        mViewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SiteViewModel.class);
+        mViewModel = new ViewModelProvider(getViewModelStore(), ReflectiveViewModelFactory.get()).get(SiteViewModel.class);
         mViewModel.getResult().observeForever(mObserveDetail);
         mViewModel.getPlayer().observeForever(mObservePlayer);
         mViewModel.getSearch().observeForever(mObserveSearch);

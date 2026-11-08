@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.lifecycle.ViewModelProvider;
+import com.yingtu.plus.viewmodel.ReflectiveViewModelFactory;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -54,6 +55,25 @@ public class SearchActivity extends BaseActivity {
         activity.startActivity(intent);
     }
 
+    // 第 21 轮：逐字抄上游 mobile SearchActivity:38-54 的 direct() 重载（供 HomeWebBridge 调用）。
+    public static void direct(Activity activity, String keyword) {
+        direct(activity, keyword, null);
+    }
+
+    public static void direct(Activity activity, String keyword, String siteKey) {
+        direct(activity, keyword, siteKey, null, null);
+    }
+
+    public static void direct(Activity activity, String keyword, String siteKey, String pic, String wallPic) {
+        Intent intent = new Intent(activity, SearchActivity.class);
+        intent.putExtra("keyword", keyword);
+        intent.putExtra("siteKey", siteKey);
+        intent.putExtra("pic", pic);
+        intent.putExtra("wallPic", wallPic);
+        intent.putExtra("direct", true);
+        activity.startActivity(intent);
+    }
+
     private EditText etKeyword;
     private ChipGroup chipHistory;
     private View emptyView;
@@ -93,7 +113,7 @@ public class SearchActivity extends BaseActivity {
         });
         rv.setAdapter(adapter);
 
-        viewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SourceViewModel.class);
+        viewModel = new ViewModelProvider(getViewModelStore(), ReflectiveViewModelFactory.get()).get(SourceViewModel.class);
         viewModel.searchResult.observe(this, movies -> {
             boolean empty = movies == null || movies.isEmpty();
             emptyView.setVisibility(empty ? View.VISIBLE : View.GONE);

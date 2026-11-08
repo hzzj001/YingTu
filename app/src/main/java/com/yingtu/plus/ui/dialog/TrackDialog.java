@@ -26,6 +26,9 @@ public class TrackDialog extends DialogFragment {
     /** 轨道面板回调（VideoActivity 实现它）。 */
     public interface Listener {
         void onTrackPanel(int type);
+
+        // 第 21 轮：上游 TrackDialog.Listener 只声明 onSubtitleClick；本地 VideoActivity 已实现该方法，补声明只为编译。
+        void onSubtitleClick();
     }
 
     private int type;

@@ -20,6 +20,11 @@ public final class Source {
     public interface Extractor {
         boolean match(Uri uri);
 
+        // 第 21 轮：逐字抄上游 Source.java:175-177 的默认方法（Youtube 用 @Override 实现它）。
+        default String fetch(Result result) throws Exception {
+            return fetch(result.getUrl().v());
+        }
+
         String fetch(String url) throws Exception;
 
         void stop();

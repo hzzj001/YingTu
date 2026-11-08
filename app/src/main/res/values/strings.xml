@@ -390,6 +390,14 @@
     <string name="play_exo">EXO</string>
     <!-- 移植自上游 webhtv：string play_fullscreen -->
     <string name="play_fullscreen">Fullscreen</string>
+    <!-- 移植自上游 webhtv：string play_forward -->
+    <string name="play_forward">→</string>
+    <!-- 移植自上游 webhtv：string play_backward -->
+    <string name="play_backward">←</string>
+    <!-- 移植自上游 webhtv：string play_forward_hint -->
+    <string name="play_forward_hint">Normal play switched</string>
+    <!-- 移植自上游 webhtv：string play_backward_hint -->
+    <string name="play_backward_hint">Reverse play switched</string>
     <!-- 移植自上游 webhtv：string play_lut -->
     <string name="play_lut">LUT</string>
     <!-- 移植自上游 webhtv：string play_next -->

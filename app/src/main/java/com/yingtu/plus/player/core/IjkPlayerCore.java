@@ -49,21 +49,48 @@ public class IjkPlayerCore implements AbstractPlayer {
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "dns_cache_clear", 1);
         if (surface != null) player.setSurface(surface);
 
-        player.setOnPreparedListener(mp -> { if (listener != null) listener.onPrepared(); });
-        player.setOnCompletionListener(mp -> { if (listener != null) listener.onCompletion(); });
-        player.setOnErrorListener((mp, what, extra) -> {
-            if (listener != null) listener.onError("IJK error " + what + "/" + extra);
-            return true;
-        });
-        player.setOnInfoListener((mp, what, extra) -> {
-            if (listener == null) return false;
-            if (what == IMediaPlayer.MEDIA_INFO_BUFFERING_START) listener.onBuffering(true);
-            else if (what == IMediaPlayer.MEDIA_INFO_BUFFERING_END) listener.onBuffering(false);
-            else if (what == IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) listener.onBuffering(false);
-            return false;
-        });
-        player.setOnVideoSizeChangedListener((mp, w, h, sarNum, sarDen) -> {
-            if (listener != null) listener.onVideoSizeChanged(w, h);
+        // 第 21 轮：vendored ijk 没有 setOn*Listener 旧 API，改用 IMediaPlayer.Listener（上游 IjkSimplePlayer 同款写法）。
+        player.setListener(new IMediaPlayer.Listener() {
+            @Override
+            public void onBufferingUpdate(IMediaPlayer mp, int percent) {
+            }
+
+            @Override
+            public void onBufferingUpdate(IMediaPlayer mp, long percent) {
+            }
+
+            @Override
+            public void onCompletion(IMediaPlayer mp) {
+                if (listener != null) listener.onCompletion();
+            }
+
+            @Override
+            public boolean onError(IMediaPlayer mp, int what, int extra) {
+                if (listener != null) listener.onError("IJK error " + what + "/" + extra);
+                return true;
+            }
+
+            @Override
+            public void onInfo(IMediaPlayer mp, int what, int extra) {
+                if (listener == null) return;
+                if (what == IMediaPlayer.MEDIA_INFO_BUFFERING_START) listener.onBuffering(true);
+                else if (what == IMediaPlayer.MEDIA_INFO_BUFFERING_END) listener.onBuffering(false);
+                else if (what == IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) listener.onBuffering(false);
+            }
+
+            @Override
+            public void onPrepared(IMediaPlayer mp) {
+                if (listener != null) listener.onPrepared();
+            }
+
+            @Override
+            public void onTimedText(IMediaPlayer mp, tv.danmaku.ijk.media.player.IjkTimedText text) {
+            }
+
+            @Override
+            public void onVideoSizeChanged(IMediaPlayer mp, int w, int h, int sarNum, int sarDen) {
+                if (listener != null) listener.onVideoSizeChanged(w, h);
+            }
         });
     }
 

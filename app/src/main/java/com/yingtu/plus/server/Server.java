@@ -1,5 +1,6 @@
 package com.yingtu.plus.server;
 
+import com.yingtu.plus.service.PlaybackService;
 import com.yingtu.plus.web.WebServer;
 
 /**
@@ -15,7 +16,18 @@ public final class Server {
 
     private static volatile Server instance;
 
+    // 第 21 轮：照抄上游 Server 的 service 字段与 get/setService（PlaybackService 持有）。
+    private volatile PlaybackService service;
+
     private Server() {
+    }
+
+    public PlaybackService getService() {
+        return service;
+    }
+
+    public void setService(PlaybackService service) {
+        this.service = service;
     }
 
     public static Server get() {

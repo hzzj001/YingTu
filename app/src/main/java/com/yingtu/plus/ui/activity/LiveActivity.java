@@ -1,5 +1,6 @@
 package com.yingtu.plus.ui.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -13,6 +14,7 @@ import com.yingtu.plus.api.ApiConfig;
 import com.yingtu.plus.api.LiveParser;
 import com.yingtu.plus.base.BaseActivity;
 import com.yingtu.plus.bean.LiveChannel;
+import com.yingtu.plus.api.config.LiveConfig;
 import com.yingtu.plus.bean.LiveGroup;
 import com.yingtu.plus.ui.adapter.LiveChannelAdapter;
 import com.yingtu.plus.ui.adapter.LiveGroupAdapter;
@@ -33,6 +35,11 @@ import okhttp3.Response;
  * 点击频道跳转 LivePlayActivity 播放。
  */
 public class LiveActivity extends BaseActivity {
+
+    // 第 21 轮：照抄上游 mobile LiveActivity:147-149（供 HomeWebBridge 调用）。
+    public static void start(Context context) {
+        context.startActivity(new Intent(context, LiveActivity.class).putExtra("empty", LiveConfig.isEmpty()));
+    }
 
     private ProgressBar progress;
     private TextView tvEmpty;

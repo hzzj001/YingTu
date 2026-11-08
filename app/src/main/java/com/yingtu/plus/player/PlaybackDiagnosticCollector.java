@@ -1,131 +1,155 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/main/java/com/fongmi/android/tv/player/PlaybackDiagnosticCollector.java，包名已改写为 com.yingtu.plus。
 package com.yingtu.plus.player;
 
-import com.github.catvod.crawler.diagnostics.DiagnosticEvent;
+import android.media.MediaCodec;
+import android.os.Build;
+import android.os.SystemClock;
 
-import java.util.UUID;
+import com.github.catvod.crawler.DebugLogStore;
+import com.github.catvod.crawler.diagnostics.DiagnosticEvent;
+import com.github.catvod.crawler.diagnostics.DiagnosticText;
+
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-/**
- * 兼容实现，待上游 webhtv 源码对齐。
- *
- * 播放诊断收集器（exo / ijk / mpv 各引擎一个）：把播放过程中的诊断事件
- * （解码器、音频输出、缓冲等）以 {@link DiagnosticEvent} 形式记下来，
- * 供诊断桥接与问题排查使用。兼容实现只保留调用点用到的接口，
- * 所有 emit / error / evidence / baseline 调用均为无操作（不写日志、不上报）。
- */
+import static com.github.catvod.crawler.diagnostics.DiagnosticEvent.Status.*;
+
+/** Per-engine evidence. Contexts are immutable and may safely outlive the current media. */
 public final class PlaybackDiagnosticCollector {
+    public record Context(String trace, long generation, long attempt, String mediaId, String role) {}
+    private static final AtomicLong IDS = new AtomicLong();
+    private static final WeakHashMap<Object, String> OBJECT_IDS = new WeakHashMap<>();
+    private final String instance = id("player");
+    private final String engine, version;
+    private final AtomicLong sequence = new AtomicLong();
+    private volatile Context current = new Context("none", 0, 0, null, "unresolved");
+    private volatile int videoLevel = -1, audioLevel = -1;
+    private volatile String firstError, lastError;
+    private volatile boolean protectedMedia;
+    private long captureGeneration = -1;
+    private volatile boolean ended;
 
-    /** 一次诊断上下文（一次播放 / 一个诊断会话）。 */
-    public static final class Context {
-        private final String mediaId;
-        private final String trace;
-        private final long attempt;
-        private final long generation;
+    public PlaybackDiagnosticCollector(String engine, String version) { this.engine = engine; this.version = version; }
+    public static boolean enabled() { return DebugLogStore.isEnabled(); }
+    public static String id(String kind) { return kind + "-" + IDS.incrementAndGet(); }
+    public static synchronized String objectId(Object object, String kind) {
+        return object == null ? "none" : OBJECT_IDS.computeIfAbsent(object, key -> id(kind));
+    }
+    public Context context() { return current; }
+    public String instanceId() { return instance; }
+    public String engine() { return engine; }
+    public boolean ended() { return ended; }
+    public boolean protectedMedia() { return protectedMedia; }
+    public void protectedMedia(boolean value) { protectedMedia = value; }
 
-        public Context(String mediaId) {
-            this.mediaId = mediaId == null ? "" : mediaId;
-            // 兼容实现：begin(traceId, scope) 把 traceId 当 mediaId 传进来，故 trace 即 mediaId；
-            // attempt / generation 暂无真实会话计数，均为 0。
-            this.trace = this.mediaId;
-            this.attempt = 0;
-            this.generation = 0;
+    public synchronized Context begin(String trace, String role) {
+        if (current.attempt() > 0) end("reprepare");
+        boolean same = current.trace().equals(trace);
+        current = new Context(PlaybackTrace.normalize(trace), current.generation() + (same ? 0 : 1),
+                current.attempt() + 1, id("media"), role);
+        videoLevel = audioLevel = -1; firstError = lastError = null; captureGeneration = -1; ended = false;
+        if ("foreground".equals(role)) DiagnosticControls.playback(this);
+        baseline(false);
+        return current;
+    }
+
+    public synchronized void baseline() {
+        baseline(true);
+    }
+
+    private void baseline(boolean late) {
+        if (!enabled() || captureGeneration == DebugLogStore.captureGeneration()) return;
+        if (captureGeneration != -1) { videoLevel = audioLevel = -1; firstError = lastError = null; }
+        captureGeneration = DebugLogStore.captureGeneration();
+        NativeLibraryDiagnostics.request();
+        emit(current, "diag.session.begin", "engine-collector", "engine-context", e -> e
+                .observed("mode", "standard").observed("captureStartedLate", late)
+                .observed("engineInstance", instance).observed("captureGeneration", captureGeneration)
+                .unknown("physicalVideo", NOT_OBSERVABLE).unknown("audibility", NOT_OBSERVABLE)
+                .pin(instance + "-baseline"));
+    }
+
+    public void emit(Context owner, String name, String source, String association, Consumer<DiagnosticEvent> facts) {
+        emit(owner, name, source, association, null, facts);
+    }
+
+    public void emitNative(Context owner, String name, String source, String association, String prefix, Consumer<DiagnosticEvent> facts) {
+        emit(owner, name, source, association, prefix == null ? "" : prefix, facts);
+    }
+
+    private void emit(Context owner, String name, String source, String association, String nativePrefix, Consumer<DiagnosticEvent> facts) {
+        if (nativePrefix == null ? !DebugLogStore.acceptsEvent(name) : !DebugLogStore.isEnabled()
+                || !DebugLogStore.categoryEnabled(com.github.catvod.crawler.diagnostics.DiagnosticCategories.nativePrefix(nativePrefix))) return;
+        try {
+            Context ctx = owner == null ? new Context("none", 0, 0, null, "unresolved") : owner;
+            DiagnosticEvent event = new DiagnosticEvent(name, ctx.trace(), instance, ctx.generation(), ctx.attempt())
+                    .source(engine, version, ctx.role(), source, association, ctx.mediaId(), current.mediaId(),
+                            sequence.incrementAndGet(), SystemClock.elapsedRealtimeNanos());
+            facts.accept(event);
+            DebugLogStore.event(event);
+        } catch (RuntimeException ignored) { DebugLogStore.collectorFailure(); }
+    }
+
+    public void emit(String name, String source, Consumer<DiagnosticEvent> facts) {
+        emit(current, name, source, "engine-context", facts);
+    }
+
+    public void evidence(Context owner, boolean video, int level) {
+        if (owner != current || !enabled()) return;
+        if (video) videoLevel = Math.max(videoLevel, level); else audioLevel = Math.max(audioLevel, level);
+    }
+
+    public void error(Context owner, String domain, String stage, Throwable error) {
+        if (!enabled() || error == null) return;
+        String errorId = id("error");
+        if (owner == current) { if (firstError == null) firstError = errorId; lastError = errorId; }
+        if (domain.startsWith("video") || domain.startsWith("audio"))
+            emit(owner, domain.startsWith("video") ? "video.error" : "audio.error", domain, "exception-chain", e -> e
+                    .severity("error").observed("errorId", errorId).observed("stage", stage)
+                    .observed("javaClass", error.getClass().getName()).message(error.getMessage()));
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        Throwable cause = error;
+        for (int depth = 0; cause != null && depth < 8 && visited.add(cause); depth++, cause = cause.getCause()) {
+            Throwable item = cause;
+            int index = depth;
+            emit(owner, "diag.error", domain, "exception-chain", e -> {
+                e.severity("error").observed("errorId", errorId).observed("domain", domain).observed("stage", stage)
+                        .observed("chunk", index).observed("javaClass", item.getClass().getName())
+                        .observed("message", String.valueOf(item.getMessage())).pin(instance + "-error");
+                if (Build.VERSION.SDK_INT >= 21 && item instanceof MediaCodec.CodecException codec) {
+                    e.observed("diagnosticInfo", codec.getDiagnosticInfo()).observed("recoverable", codec.isRecoverable())
+                            .observed("transient", codec.isTransient());
+                    if (Build.VERSION.SDK_INT >= 23) e.observed("errorCode", codec.getErrorCode());
+                }
+            });
         }
-
-        public String mediaId() {
-            return mediaId;
-        }
-
-        /** 诊断 trace id（上游 DiagnosticControls.port 用到）。 */
-        public String trace() {
-            return trace;
-        }
-
-        /** 本次播放的尝试序号（兼容实现：0）。 */
-        public long attempt() {
-            return attempt;
-        }
-
-        /** 会话代数（兼容实现：0）。 */
-        public long generation() {
-            return generation;
+        String detail = DiagnosticText.throwable(error);
+        int limit = Math.min(detail.length(), 2640), chunks = (limit + 219) / 220;
+        for (int i = 0; i < chunks; i++) {
+            int chunk = i;
+            String part = detail.substring(i * 220, Math.min(limit, (i + 1) * 220));
+            emit(owner, "diag.error", domain, "exception-detail", e -> e.severity("error")
+                    .observed("errorId", errorId).observed("chunk", chunk).observed("chunkCount", chunks)
+                    .observed("message", part).observed("truncated", detail.length() > limit));
         }
     }
 
-    private final String name;
-    private final String version;
-    private final String instanceId;
-
-    public PlaybackDiagnosticCollector(String name, String version) {
-        this.name = name == null ? "" : name;
-        this.version = version == null ? "" : version;
-        this.instanceId = UUID.randomUUID().toString();
-    }
-
-    /** 诊断收集总开关（兼容实现：关闭）。 */
-    public static boolean enabled() {
-        return false;
-    }
-
-    /** 生成一个带前缀的诊断对象 ID。 */
-    public static String id(String kind) {
-        return (kind == null ? "unknown" : kind) + "-" + UUID.randomUUID().toString().substring(0, 8);
-    }
-
-    /** 按对象 + 种类生成稳定可读的诊断对象 ID。 */
-    public static String objectId(Object object, String kind) {
-        if (object == null) return id(kind);
-        return (kind == null ? "unknown" : kind) + "@" + Integer.toHexString(System.identityHashCode(object));
-    }
-
-    public Context context() {
-        return new Context("");
-    }
-
-    public String instanceId() {
-        return instanceId;
-    }
-
-    /** 发一条诊断事件（兼容实现：不做任何事）。 */
-    public void emit(String category, String message, Consumer<DiagnosticEvent> fill) {
-    }
-
-    /** 发一条带上下文的诊断事件（兼容实现：不做任何事）。 */
-    public void emit(Context context, String category, String name, String message, Consumer<DiagnosticEvent> fill) {
-    }
-
-    /** 记一条错误诊断事件（兼容实现：不做任何事）。 */
-    public void error(Context context, String category, String message, Throwable error) {
-    }
-
-    /** 开始一个诊断上下文。 */
-    public Context begin(String traceId, String scope) {
-        return new Context(traceId);
-    }
-
-    /** 结束一个诊断范围（兼容实现：不做任何事）。 */
-    public void end(String scope) {
-    }
-
-    /** 记一条证据（兼容实现：不做任何事）。 */
-    public void evidence(Context context, boolean video, int code) {
-    }
-
-    /** 记一条基线（兼容实现：不做任何事）。 */
-    public void baseline() {
-    }
-
-    /** 当前媒体是否受保护（DRM 等）；兼容实现返回 false。 */
-    public boolean protectedMedia() {
-        return false;
-    }
-
-    /** 本次收集是否已结束（兼容实现：永不结束；供上游 DiagnosticControls.port 用到）。 */
-    public boolean ended() {
-        return false;
-    }
-
-    /** 当前播放引擎名（兼容实现：未追踪，返回空串；供上游 DiagnosticControls.port 用到）。 */
-    public String engine() {
-        return "";
+    public synchronized void end(String reason) {
+        if (ended) return;
+        ended = true;
+        Context owner = current;
+        com.github.catvod.crawler.diagnostics.DiagnosticCapture.Session depth = com.github.catvod.crawler.diagnostics.DiagnosticCapture.current(owner.trace(), owner.generation(), owner.attempt());
+        if (depth != null && depth.instance().equals(instance)) com.github.catvod.crawler.diagnostics.DiagnosticCapture.stop("playback-ended");
+        emit(owner, "play.attempt.end", "engine-collector", "engine-context", e -> e
+                .observed("reason", reason).observed("closed", true)
+                .observed("videoEvidenceLevel", videoLevel < 0 ? null : videoLevel).observed("audioEvidenceLevel", audioLevel < 0 ? null : audioLevel)
+                .observed("firstError", firstError).observed("lastError", lastError)
+                .unknown("physicalVideo", NOT_OBSERVABLE).unknown("audibility", NOT_OBSERVABLE)
+                .observed("missingEvidence", "physical presentation; per-collector unavailable fields")
+                .pin(instance + "-end"));
     }
 }

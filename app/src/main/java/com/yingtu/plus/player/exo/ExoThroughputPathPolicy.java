@@ -174,7 +174,7 @@ public final class ExoThroughputPathPolicy {
         };
     }
 
-    enum Trust {
+    public enum Trust {
         TRUSTED("trusted"),
         LIMITED("limited"),
         BLOCKED("blocked");
@@ -190,7 +190,7 @@ public final class ExoThroughputPathPolicy {
         }
     }
 
-    enum Reason {
+    public enum Reason {
         DIRECT_REMOTE("direct-remote"),
         DIRECT_LAN("direct-lan"),
         APP_SERVICE_VISIBLE("app-service-visible"),
@@ -214,7 +214,7 @@ public final class ExoThroughputPathPolicy {
         }
     }
 
-    record Decision(
+    public record Decision(
             Trust trust,
             PlaybackAutoContext.Confidence confidence,
             Reason reason) {

@@ -34,10 +34,10 @@ android {
     }
 
     // jdtech libmpv 自带 FFmpeg 7.1.1 的 .so（libavcodec/libavutil/libswresample/libswscale），
-    // 与 libs 里 nextlib-media3ext AAR 自带的 FFmpeg 6.0 同名同路径；
+    // 与 nextlib-media3ext Maven 产物（r4）自带的 FFmpeg 9.0.1 同名同路径；
     // 不加 pickFirsts 会在 mergeDebugNativeLibs 报重复文件。声明顺序在前者优先（nextlib 先声明），
-    // 即 FFmpeg 6.0 的副本进包：ExoPlayer 的 ffmpeg 扩展用它；旧 mpv 核心（MpvPlayerCore）
-    // 建在 7.1.1 上，运行时加载到 6.0 副本有缺符号风险——旧核心本就只是过渡，默认播放器是 Exo。
+    // 即 FFmpeg 9.0.1 的副本进包：ExoPlayer 的 ffmpeg 扩展用它；旧 mpv 核心（MpvPlayerCore）
+    // 建在 7.1.1 上，运行时加载到 9.0.1 副本有缺符号风险——旧核心本就只是过渡，默认播放器是 Exo。
     packagingOptions {
         jniLibs {
             pickFirsts += ['lib/arm64-v8a/libavcodec.so', 'lib/arm64-v8a/libavutil.so',
@@ -52,7 +52,7 @@ android {
     }
 }
 
-// 禁用 AAR 元数据检查（nextlib AAR 的 minCompileSdk=37，CI 的 SDK 仓库无 android-37 包）
+// 禁用 AAR 元数据检查（nextlib r4 产物的 minCompileSdk=37，CI 的 SDK 仓库无 android-37 包）
 tasks.matching { it.name == 'checkDebugAarMetadata' || it.name == 'checkReleaseAarMetadata' }.configureEach {
     enabled = false
     onlyIf { false }
@@ -114,10 +114,14 @@ dependencies {
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
-    implementation 'androidx.room:room-runtime:2.6.1'
-    annotationProcessor 'androidx.room:room-compiler:2.6.1'
+    implementation 'androidx.room:room-runtime:2.8.4'
+    annotationProcessor 'androidx.room:room-compiler:2.8.4'
+    // Room 2.6.1 → 2.8.4（上游 libs.versions.toml:18 同款）：ConfigDao.java:20 用的 RoomWarnings.QUERY_MISMATCH 在 2.6.1 里不存在。
     implementation 'org.greenrobot:eventbus:3.3.1'
-    implementation files('libs/nextlib-media3ext-1.10.0-0.12.1-fongmi-softload.aar')
+    // nextlib FFmpeg 扩展（上游 libs.nextlib.media3ext 同款；本地旧 AAR 无 Java 类，缺 FfmpegAudioRenderer 等）。
+    // 用 r4（上游 third_party/maven 仓库实际有的版本；toml 写的是 r5，但仓库里只有 r4，以实际能拿到为准；仓库见 settings.gradle）。
+    // 声明位置保持在 libmpv 之前，让 nextlib 的 FFmpeg .so 优先（见上面 packagingOptions 的注释）。
+    implementation 'io.github.anilbeesetti:nextlib-media3ext:1.10.0-0.12.1-fongmi-softload-av3a-avs3-ffmpeg901-r4'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
@@ -166,8 +170,25 @@ dependencies {
     // Youtube.java 用 NewPipeExtractor（上游 libs.versions.toml:47 同款 v0.26.3，JitPack；settings.gradle 已有 jitpack 仓库）。
     // 已知风险：JitPack 之前出现过 401，若 CI 再报 401 需另想办法。
     implementation 'com.github.TeamNewPipe:NewPipeExtractor:v0.26.3'
+    // Build #11 剩下的缺失依赖（均按上游 libs.versions.toml 版本）：
+    // TypeDialog 用 FlexboxLayoutManager（上游 flexbox 3.0.0，Google Maven）。
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
+    // AssInput 用 UniversalDetector（上游 juniversalchardet 1.0.3，Maven Central）。
+    implementation 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'
+    // PermissionCallback / PermissionUtil 用 PermissionX（上游 permissionx 1.8.1，Maven Central）。
+    implementation 'com.guolindev.permissionx:permissionx:1.8.1'
+    // OkGlideModule 用 OkHttpUrlLoader（与本地 glide 4.16.0 同版本；上游 glide 是 5.0.7，但本地是 4.16.0，不跟升）。
+    implementation 'com.github.bumptech.glide:okhttp3-integration:4.16.0'
+    // ColorGenerator 用 MDColor（上游 materialdesigncolors 1.0.0，JitPack）。
+    implementation 'com.github.bassaer:materialdesigncolors:1.0.0'
+    // DolbyVisionP81Extractor 用 LibDovi / FrameInfo 等（上游 exoplayerHdrUtils 0.4.0，Maven Central）。
+    implementation 'com.suyashbelekar:exoplayerhdrutils:0.4.0'
+    // BasicPitchTfliteGenerator 用 org.tensorflow.lite.Interpreter（上游 tensorflowLite 2.17.0，但该产物已迁移：
+    // Maven Central 的 tensorflow-lite 2.17.0 .jar 请求返回的是带 relocation 到 com.google.ai.edge.litert:litert:1.0.1 的 POM，下不到真包；
+    // 改用 litert 1.0.1（Google Maven），AAR 里含 Interpreter 与 4 架构 libtensorflowlite_jni.so，包名保持 org.tensorflow.lite 不变）。
+    implementation 'com.google.ai.edge.litert:litert:1.0.1'
     // 迅雷 / 鉴片 / forcetech / tvbus 四个 AAR 由 downloadVendorAars 任务在 preBuild 前下载到 libs/；
-    // nextlib AAR 已在上面用 files() 单独引入，这里排除它，避免同一 AAR 依赖两次。
+    // libs/ 里遗留的旧 nextlib AAR（无 Java 类）排除在外——nextlib 现在走上面 Maven 产物，避免同一 AAR 依赖两次。
     implementation fileTree(dir: "libs", include: ["*.aar"], exclude: ["nextlib-media3ext-1.10.0-0.12.1-fongmi-softload.aar"])
     implementation project(':catvod')
     implementation project(':quickjs')

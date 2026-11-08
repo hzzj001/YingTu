@@ -183,7 +183,7 @@ public final class ExoMemoryPressurePolicy {
         return Math.max(0, now - then);
     }
 
-    record Observation(
+    public record Observation(
             PlaybackAutoContext.MemoryPressure pressure,
             boolean pressureUsable,
             boolean snapshotUsable,
@@ -209,7 +209,7 @@ public final class ExoMemoryPressurePolicy {
         }
     }
 
-    record Decision(
+    public record Decision(
             int baselineTargetBytes,
             int safeTargetBytes,
             int effectiveTargetBytes,

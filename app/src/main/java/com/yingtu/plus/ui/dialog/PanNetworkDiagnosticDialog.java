@@ -898,8 +898,7 @@ public final class PanNetworkDiagnosticDialog extends DialogFragment implements 
         button.setPaddingRelative(dp(6), 0, dp(6), 0);
         button.setInsetTop(0);
         button.setInsetBottom(0);
-        button.setInsetLeft(0);
-        button.setInsetRight(0);
+        // 第 24 轮：setInsetLeft/Right 只有 material 1.12.0+ 才有，本地是 1.11.0；删掉，纯外观调整。
         button.setCornerRadius(dp(9));
         button.setFocusable(true);
         button.setFocusableInTouchMode(Util.isLeanback());

@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
+import com.yingtu.plus.viewmodel.ReflectiveViewModelFactory;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -169,7 +170,7 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
     }
 
     private void setViewModel() {
-        mViewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SiteViewModel.class);
+        mViewModel = new ViewModelProvider(getViewModelStore(), ReflectiveViewModelFactory.get()).get(SiteViewModel.class);
         mViewModel.getResult().observe(getViewLifecycleOwner(), this::setAdapter);
     }
 

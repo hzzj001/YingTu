@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.lifecycle.ViewModelProvider;
+import com.yingtu.plus.viewmodel.ReflectiveViewModelFactory;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -71,7 +72,7 @@ public class DetailActivity extends BaseActivity {
         seriesAdapter.setOnSeriesClick(this::playSeries);
         rvSeries.setAdapter(seriesAdapter);
 
-        viewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SourceViewModel.class);
+        viewModel = new ViewModelProvider(getViewModelStore(), ReflectiveViewModelFactory.get()).get(SourceViewModel.class);
         viewModel.detailResult.observe(this, this::bind);
 
         progress.setVisibility(View.VISIBLE);

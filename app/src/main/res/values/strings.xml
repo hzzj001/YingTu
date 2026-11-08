@@ -1200,4 +1200,8 @@
     <string name="control_speed">Speed</string>
     <string name="control_track">Track</string>
     <string name="parse">Parse</string>
+    <!-- 第 24 轮：补上游 strings.xml 原文（Build #23 缺失，ViewingRecordSyncStore / CustomCspSetting 引用）。 -->
+    <string name="viewing_record_sync_entry_summary">%1$s · Remote %2$d/%3$d · Webhook %4$d/%5$d</string>
+    <string name="setting_custom_csp_permission_required">Site injection needs file access permission.</string>
+    <string name="setting_custom_csp_save_failed">Site injection save failed: %1$s</string>
 </resources>

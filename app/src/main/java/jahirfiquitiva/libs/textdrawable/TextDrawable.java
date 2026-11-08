@@ -34,12 +34,25 @@ public class TextDrawable {
         public TextDrawable buildRect(String text) {
             return new TextDrawable(width, height, color);
         }
+
+        // 第 24 轮：ImgUtil（移植自上游）调 buildRect(text, color)；fork 自带的这个替身文件
+        // 原来只有 buildRect(String)，编译时挡住了 JitPack 真库。补上带 color 的重载。
+        public TextDrawable buildRect(String text, int color) {
+            this.color = color;
+            return new TextDrawable(width, height, color);
+        }
         
         public TextDrawable buildRound(String text) {
             return new TextDrawable(width, height, color);
         }
         
         public TextDrawable buildRoundRect(String text, int radius) {
+            return new TextDrawable(width, height, color);
+        }
+
+        // 第 24 轮：同上，补 buildRoundRect(text, color, radius)，供 ImgUtil 调用。
+        public TextDrawable buildRoundRect(String text, int color, int radius) {
+            this.color = color;
             return new TextDrawable(width, height, color);
         }
     }

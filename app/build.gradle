@@ -1,5 +1,22 @@
 apply plugin: 'com.android.application'
 
+// 第 24 轮：CI 解析到的 lifecycle 版本比声明的 2.7.0 新，新版删了 NewInstanceFactory、
+// Factory.create(Class)、ViewModelProvider(Store, Factory)（Build #19/#20/#23 均因此失败）。
+// 把 lifecycle 锁回 2.7.0（与本地声明版本一致，已用 2.7.0 AAR 核对：三个构造方法、
+// NewInstanceFactory、create(Class) 都在）。不锁 lifecycle-service（media3-session 要用它）。
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.lifecycle:lifecycle-viewmodel:2.7.0'
+        force 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+        force 'androidx.lifecycle:lifecycle-runtime:2.7.0'
+        force 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+        force 'androidx.lifecycle:lifecycle-livedata:2.7.0'
+        force 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
+        force 'androidx.lifecycle:lifecycle-common:2.7.0'
+    }
+}
+
+
 android {
     namespace 'com.yingtu.plus'
     compileSdk 36

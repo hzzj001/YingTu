@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.gridlayout.widget.GridLayout;
 import androidx.lifecycle.ViewModelProvider;
+import com.yingtu.plus.viewmodel.ReflectiveViewModelFactory;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -117,7 +118,7 @@ public class HomeMainFragment extends BaseLazyFragment {
             }
         });
 
-        viewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SourceViewModel.class);
+        viewModel = new ViewModelProvider(getViewModelStore(), ReflectiveViewModelFactory.get()).get(SourceViewModel.class);
     }
 
     private void buildQuickGrid() {

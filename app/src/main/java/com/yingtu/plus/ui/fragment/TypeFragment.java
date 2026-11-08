@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import com.yingtu.plus.viewmodel.ReflectiveViewModelFactory;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -122,7 +123,7 @@ public class TypeFragment extends BaseFragment implements CustomScroller.Callbac
     }
 
     private void setViewModel() {
-        mViewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SiteViewModel.class);
+        mViewModel = new ViewModelProvider(getViewModelStore(), ReflectiveViewModelFactory.get()).get(SiteViewModel.class);
         mViewModel.getResult().observe(getViewLifecycleOwner(), this::setAdapter);
         mViewModel.getAction().observe(getViewLifecycleOwner(), result -> Notify.show(result.getMsg()));
     }

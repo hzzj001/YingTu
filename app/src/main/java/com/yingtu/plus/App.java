@@ -114,6 +114,11 @@ public class App extends Application {
         MAIN_HANDLER.removeCallbacks(runnable);
     }
 
+    /** 可变参数版：一次移除多个回调（上游 App.java:76-81 同款）。 */
+    public static void removeCallbacks(Runnable... runnable) {
+        for (Runnable r : runnable) MAIN_HANDLER.removeCallbacks(r);
+    }
+
     /** 全局 Gson 单例。 */
     public static Gson gson() {
         return GSON;

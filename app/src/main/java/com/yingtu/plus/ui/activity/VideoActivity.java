@@ -45,6 +45,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -206,6 +207,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
     public static final String KEY_FLAG_NAME = "playFlagName";
     public static final String KEY_INDEX = "playIndex";
     public static final String KEY_EPISODE = "episodeName";
+    public static final String KEY_POSITION = "position";
     private static final int LYRICS_TAB_TRACK = 2;
     private static final int AUDIO_QUEUE_TAB_CURRENT = 0;
     private static final int AUDIO_QUEUE_TAB_SEARCH = 1;
@@ -299,6 +301,8 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
     private CustomKeyDown mKeyDown;
     private List<String> mBroken;
     private History mHistory;
+    // DetailActivity 传来的续播位置只应用一次的守卫：记下已应用过的 history key，避免刷新时把进度拉回旧值。
+    private String resumePositionAppliedKey;
     private boolean fullscreen;
     private boolean initAuto;
     private boolean autoMode;
@@ -740,7 +744,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
 
     private void configureAudioLandscapeActions() {
         if (mBinding == null || !ResUtil.isLand(this)) return;
-        if (mBinding.audioTransport instanceof ViewGroup transport) {
+        if (mBinding.audioTransport instanceof LinearLayoutCompat transport) {
             for (int i = 0; i < transport.getChildCount(); i++) {
                 View child = transport.getChildAt(i);
                 if (!(child instanceof ViewGroup group)) continue;
@@ -1230,7 +1234,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
     }
 
     private void setViewModel() {
-        mViewModel = new ViewModelProvider(this).get(SiteViewModel.class);
+        mViewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SiteViewModel.class);
         mViewModel.getResult().observeForever(mObserveDetail);
         mViewModel.getPlayer().observeForever(mObservePlayer);
         mViewModel.getSearch().observeForever(mObserveSearch);
@@ -4406,6 +4410,13 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
     private void checkHistory(Vod item) {
         mHistory = History.find(getHistoryKey());
         mHistory = mHistory == null ? createHistory(item) : mHistory;
+        // DetailActivity 传来的续播位置（KEY_POSITION，毫秒）：DetailActivity 已校验是同一集才带上。
+        // 仅当本 intent 带了正数位置、且该 history key 尚未应用过时才写进 mHistory（播放读的就是它）。
+        long resumePosition = getIntent().getLongExtra(KEY_POSITION, -1);
+        if (resumePosition > 0 && !getHistoryKey().equals(resumePositionAppliedKey)) {
+            mHistory.setPosition(resumePosition);
+            resumePositionAppliedKey = getHistoryKey();
+        }
         if (!TextUtils.isEmpty(getWallPic())) mHistory.setWallPic(getWallPic());
         if (!TextUtils.isEmpty(getMark())) mHistory.setVodRemarks(getMark());
         if (Setting.isIncognito() && mHistory.getKey().equals(getHistoryKey())) mHistory.delete();

@@ -130,4 +130,27 @@
     <!-- 注意：上游 fish2018/webhtv @ HEAD 4e30ffa 全树无此二 style 的定义（仅 Java 引用，含影图已有的 VideoActivity:3642），属上游遗留缺口；此处仅以 Material3 父主题补最小定义使链接通过，未改对话框逻辑。 -->
     <style name="ThemeOverlay_WebHTV_LightDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog" />
     <style name="Theme_WebHTV_LightDialog" parent="Theme.Material3.Light.Dialog" />
+    <!-- 影图+ 第 20 轮：dialog_control.xml 引用，逐字取自上游 mobile styles.xml -->
+    <style name="ControlSheetTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">13dp</item>
+        <item name="android:layout_marginBottom">7dp</item>
+        <item name="android:textColor">@color/white_70</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ControlSheetButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">34dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginEnd">7dp</item>
+        <item name="android:background">@drawable/selector_control_sheet_button</item>
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/selector_control_sheet_text</item>
+        <item name="android:textSize">13sp</item>
+    </style>
 </resources>

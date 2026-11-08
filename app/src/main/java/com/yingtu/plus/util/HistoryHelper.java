@@ -29,7 +29,7 @@ public class HistoryHelper {
         Collections.sort(list, new Comparator<History>() {
             @Override
             public int compare(History a, History b) {
-                return Long.compare(b.updateTime, a.updateTime);
+                return Long.compare(b.getUpdateTime(), a.getUpdateTime());
             }
         });
         return list;
@@ -38,19 +38,19 @@ public class HistoryHelper {
     public static History find(String key) {
         if (key == null) return null;
         for (History h : getAll()) {
-            if (key.equals(h.key)) return h;
+            if (key.equals(h.getKey())) return h;
         }
         return null;
     }
 
     public static void save(History history) {
-        if (history == null || history.key == null) return;
-        history.updateTime = System.currentTimeMillis();
+        if (history == null || history.getKey() == null) return;
+        history.setUpdateTime(System.currentTimeMillis());
         List<History> list = getAll();
         Iterator<History> it = list.iterator();
         while (it.hasNext()) {
             History h = it.next();
-            if (history.key.equals(h.key)) {
+            if (history.getKey().equals(h.getKey())) {
                 it.remove();
                 break;
             }
@@ -65,7 +65,7 @@ public class HistoryHelper {
         List<History> list = getAll();
         Iterator<History> it = list.iterator();
         while (it.hasNext()) {
-            if (key.equals(it.next().key)) {
+            if (key.equals(it.next().getKey())) {
                 it.remove();
                 break;
             }

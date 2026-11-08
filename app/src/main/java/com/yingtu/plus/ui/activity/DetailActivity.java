@@ -71,7 +71,7 @@ public class DetailActivity extends BaseActivity {
         seriesAdapter.setOnSeriesClick(this::playSeries);
         rvSeries.setAdapter(seriesAdapter);
 
-        viewModel = new ViewModelProvider(this).get(SourceViewModel.class);
+        viewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SourceViewModel.class);
         viewModel.detailResult.observe(this, this::bind);
 
         progress.setVisibility(View.VISIBLE);
@@ -116,8 +116,9 @@ public class DetailActivity extends BaseActivity {
         // 若与历史记录是同一集，带上续播进度
         long resume = 0;
         History h = HistoryHelper.find(History.buildKey(sourceKey, vodId));
-        if (h != null && h.playFlag == vodInfo.playFlag && h.playIndex == seriesIndex) {
-            resume = h.position;
+        if (h != null && TextUtils.equals(h.getVodFlag(), flag.name)
+                && h.getEpisode() != null && TextUtils.equals(h.getEpisode().getName(), series.name)) {
+            resume = h.getPosition();
         }
 
         Intent i = new Intent(this, VideoActivity.class);

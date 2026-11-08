@@ -1,49 +1,295 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/main/java/com/fongmi/android/tv/bean/History.java，包名已改写为 com.yingtu.plus
 package com.yingtu.plus.bean;
 
+import android.text.TextUtils;
+import android.view.View;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.media3.common.C;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.yingtu.plus.App;
 import com.yingtu.plus.Constant;
+import com.yingtu.plus.R;
+import com.yingtu.plus.api.SiteApi;
 import com.yingtu.plus.api.config.VodConfig;
 import com.yingtu.plus.db.AppDatabase;
+import com.yingtu.plus.impl.Diffable;
+import com.yingtu.plus.playback.PlaybackProgressWriter;
+import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
-/**
- * 播放/观看历史记录。Room 实体（供 HistoryDao 查询），用于「观看历史」页与续播。
- */
 @Entity
-public class History implements Serializable {
+public class History implements Diffable<History>, Serializable {
 
-    /** 唯一键：sourceKey + "@@" + vodId */
+    private static final long NEAR_END_MIN_MS = TimeUnit.SECONDS.toMillis(5);
+    private static final long NEAR_END_MAX_MS = TimeUnit.SECONDS.toMillis(30);
+
     @NonNull
     @PrimaryKey
-    public String key;
-    /** 配置 ID（HistoryDao 按 cid 查，见 History.get(cid)） */
-    public int cid;
-    /** 创建时间戳（毫秒；HistoryDao 按 createTime 过滤最近记录） */
-    public long createTime;
-    public String sourceKey;
-    public String vodId;
-    public String vodName;
-    public String vodPic;
+    @SerializedName("key")
+    private String key;
+    @SerializedName("vodPic")
+    private String vodPic;
+    @SerializedName("wallPic")
+    private String wallPic;
+    @SerializedName("vodName")
+    private String vodName;
+    @SerializedName("vodFlag")
+    private String vodFlag;
+    @SerializedName("vodRemarks")
+    private String vodRemarks;
+    @SerializedName("episodeUrl")
+    private String episodeUrl;
+    @SerializedName("revSort")
+    private boolean revSort;
+    @SerializedName("revPlay")
+    private boolean revPlay;
+    @SerializedName("createTime")
+    private long createTime;
+    @SerializedName("opening")
+    private long opening;
+    @SerializedName("ending")
+    private long ending;
+    @SerializedName("position")
+    private long position;
+    @SerializedName("duration")
+    private long duration;
+    @SerializedName("speed")
+    private float speed;
+    @SerializedName("scale")
+    private int scale;
+    @SerializedName("cid")
+    private int cid;
 
-    /** 当前线路下标 / 剧集下标 */
-    public int playFlag;
-    public int playIndex;
-    /** 当前集名，用于历史列表角标显示（如「观看至 第3集」） */
-    public String episodeName;
+    private transient long updateTime;
 
-    /** 播放进度与时长（毫秒），用于续播 */
-    public long position;
-    public long duration;
+    public History() {
+        this.speed = 1;
+        this.scale = -1;
+        this.ending = C.TIME_UNSET;
+        this.opening = C.TIME_UNSET;
+        this.position = C.TIME_UNSET;
+        this.duration = C.TIME_UNSET;
+    }
 
-    /** 最近一次观看时间戳 */
-    public long updateTime;
+    public History copy() {
+        History item = new History();
+        item.key = key;
+        item.vodPic = vodPic;
+        item.wallPic = wallPic;
+        item.vodName = vodName;
+        item.vodFlag = vodFlag;
+        item.vodRemarks = vodRemarks;
+        item.episodeUrl = episodeUrl;
+        item.revSort = revSort;
+        item.revPlay = revPlay;
+        item.createTime = createTime;
+        item.opening = opening;
+        item.ending = ending;
+        item.position = position;
+        item.duration = duration;
+        item.speed = speed;
+        item.scale = scale;
+        item.cid = cid;
+        item.updateTime = updateTime;
+        return item;
+    }
 
-    public History() {}
+    public static History objectFrom(String str) {
+        return App.gson().fromJson(str, History.class);
+    }
+
+    public static List<History> arrayFrom(String str) {
+        Type listType = TypeToken.getParameterized(List.class, History.class).getType();
+        List<History> items = App.gson().fromJson(str, listType);
+        return items == null ? Collections.emptyList() : items;
+    }
+
+    public static List<History> get() {
+        return get(VodConfig.getCid());
+    }
+
+    public static List<History> get(int cid) {
+        return AppDatabase.get().getHistoryDao().find(cid, System.currentTimeMillis() - Constant.HISTORY_TIME);
+    }
+
+    public static History find(String key) {
+        return AppDatabase.get().getHistoryDao().find(VodConfig.getCid(), key);
+    }
+
+    public static List<History> findByName(String name) {
+        try {
+            return AppDatabase.get().getHistoryDao().findByName(VodConfig.getCid(), name);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    public static void delete(int cid) {
+        AppDatabase.get().getHistoryDao().delete(cid);
+    }
+
+    public static void deleteAndSync(int cid) {
+        PlaybackProgressWriter.deleteAllFromUser(cid);
+    }
+
+    public static void sync(List<History> targets) {
+        targets.forEach(target -> {
+            if (!target.canMergeByName()) {
+                target.cid(VodConfig.getCid()).save();
+                return;
+            }
+            List<History> items = findByName(target.getVodName());
+            if (items.isEmpty()) target.cid(VodConfig.getCid()).save();
+            else {
+                long latestTime = items.stream().mapToLong(History::getCreateTime).max().orElse(0L);
+                if (target.getCreateTime() > latestTime) target.cid(VodConfig.getCid()).merge(items, true).save();
+            }
+        });
+    }
+
+    @NonNull
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(@NonNull String key) {
+        this.key = key;
+    }
+
+    public String getVodPic() {
+        return vodPic;
+    }
+
+    public void setVodPic(String vodPic) {
+        this.vodPic = vodPic;
+    }
+
+    public String getWallPic() {
+        return wallPic == null ? "" : wallPic;
+    }
+
+    public void setWallPic(String wallPic) {
+        this.wallPic = wallPic;
+    }
+
+    public String getVodName() {
+        return vodName;
+    }
+
+    public void setVodName(String vodName) {
+        this.vodName = vodName;
+    }
+
+    public String getVodFlag() {
+        return vodFlag;
+    }
+
+    public void setVodFlag(String vodFlag) {
+        this.vodFlag = vodFlag;
+    }
+
+    public String getVodRemarks() {
+        return vodRemarks == null ? "" : vodRemarks;
+    }
+
+    public void setVodRemarks(String vodRemarks) {
+        this.vodRemarks = vodRemarks;
+    }
+
+    public String getEpisodeUrl() {
+        return episodeUrl == null ? "" : episodeUrl;
+    }
+
+    public void setEpisodeUrl(String episodeUrl) {
+        this.episodeUrl = episodeUrl;
+    }
+
+    public boolean isRevSort() {
+        return revSort;
+    }
+
+    public void setRevSort(boolean revSort) {
+        this.revSort = revSort;
+    }
+
+    public boolean isRevPlay() {
+        return revPlay;
+    }
+
+    public void setRevPlay(boolean revPlay) {
+        this.revPlay = revPlay;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public long getUpdateTime() {
+        return updateTime;
+    }
+
+    public long getOpening() {
+        return opening;
+    }
+
+    public void setOpening(long opening) {
+        this.opening = opening;
+    }
+
+    public long getEnding() {
+        return ending;
+    }
+
+    public void setEnding(long ending) {
+        this.ending = ending;
+    }
+
+    public long getPosition() {
+        return position;
+    }
+
+    public void setPosition(long position) {
+        this.position = position;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
+    public int getScale() {
+        return scale;
+    }
+
+    public void setScale(int scale) {
+        this.scale = scale;
+    }
 
     public int getCid() {
         return cid;
@@ -58,33 +304,202 @@ public class History implements Serializable {
         return this;
     }
 
-    // 移植自上游 webhtv bean/History.java:116-138（HEAD 4e30ffa），供 SyncDialog 用；仅包名改名。
-    public static List<History> get() {
-        return get(VodConfig.getCid());
+    public String getSiteName() {
+        return VodConfig.get().getSite(getSiteKey()).getName();
     }
 
-    public static List<History> get(int cid) {
-        return AppDatabase.get().getHistoryDao().find(cid, System.currentTimeMillis() - Constant.HISTORY_TIME);
+    public String getSiteKey() {
+        return getKey().split(AppDatabase.SYMBOL)[0];
     }
 
-    public static void delete(int cid) {
-        AppDatabase.get().getHistoryDao().delete(cid);
+    public String getVodId() {
+        String[] parts = Objects.toString(getKey(), "").split(AppDatabase.SYMBOL);
+        return parts.length > 1 ? parts[1] : "";
     }
 
-
-    public static String buildKey(String sourceKey, String vodId) {
-        return sourceKey + "@@" + vodId;
+    public Flag getFlag() {
+        return Flag.create(getVodFlag());
     }
 
-    /** 已观看百分比（0-100），无时长时返回 0 */
-    public int percent() {
-        if (duration <= 0) return 0;
-        long p = Math.min(position, duration);
-        return (int) (p * 100 / duration);
+    public Episode getEpisode() {
+        return Episode.create(getVodRemarks(), getEpisodeUrl());
     }
 
-    /** 是否可保存（上游 webhtv：position > 0 才保存；本类 position 为公开字段，等价于上游 getPosition() > 0）。 */
+    public int getSiteVisible() {
+        return TextUtils.isEmpty(getSiteName()) ? View.GONE : View.VISIBLE;
+    }
+
+    public int getRevPlayText() {
+        return isRevPlay() ? R.string.play_backward : R.string.play_forward;
+    }
+
+    public int getRevPlayHint() {
+        return isRevPlay() ? R.string.play_backward_hint : R.string.play_forward_hint;
+    }
+
+    private boolean isPushHistory() {
+        return key != null && key.startsWith(SiteApi.PUSH + AppDatabase.SYMBOL);
+    }
+
+    private boolean canMergeByName() {
+        return !isPushHistory();
+    }
+
+    private boolean shouldMerge(History item, boolean force) {
+        if (!canMergeByName() || !item.canMergeByName()) return false;
+        if (!force && getKey().equals(item.getKey())) return false;
+        if (getDuration() <= 0 || item.getDuration() <= 0) return true;
+        return Math.abs(getDuration() - item.getDuration()) <= TimeUnit.MINUTES.toMillis(10);
+    }
+
+    private History copyTo(History item) {
+        if (getOpening() > 0) item.setOpening(getOpening());
+        if (getEnding() > 0) item.setEnding(getEnding());
+        if (getSpeed() != 1) item.setSpeed(getSpeed());
+        return this;
+    }
+
     public boolean canSave() {
-        return position > 0;
+        return getPosition() > 0;
+    }
+
+    public boolean isNearEnding() {
+        if (getPosition() <= 0 || getDuration() <= 0) return false;
+        long threshold = Math.min(NEAR_END_MAX_MS, Math.max(NEAR_END_MIN_MS, getDuration() / 100));
+        long remaining = getDuration() - getPosition();
+        return remaining >= 0 && remaining <= threshold;
+    }
+
+    public void resetPlaybackPosition() {
+        setPosition(C.TIME_UNSET);
+        setDuration(C.TIME_UNSET);
+    }
+
+    public boolean canSync() {
+        return System.currentTimeMillis() - getUpdateTime() > 5000;
+    }
+
+    public History merge() {
+        merge(false);
+        return this;
+    }
+
+    private History merge(boolean force) {
+        if (!canMergeByName()) return this;
+        return merge(findByName(getVodName()), force);
+    }
+
+    private History merge(List<History> items, boolean force) {
+        for (History item : items) if (item.shouldMerge(this, force)) item.copyTo(this).delete();
+        return this;
+    }
+
+    public void replace(String key) {
+        delete();
+        setKey(key);
+    }
+
+    public History save(int cid) {
+        return cid(cid).merge(true).save();
+    }
+
+    public History save() {
+        updateTime = System.currentTimeMillis();
+        AppDatabase.get().getHistoryDao().insertOrUpdate(this);
+        return this;
+    }
+
+    public History delete() {
+        AppDatabase.get().getHistoryDao().delete(VodConfig.getCid(), getKey());
+        AppDatabase.get().getTrackDao().delete(getKey());
+        return this;
+    }
+
+    public History deleteAndSync() {
+        PlaybackProgressWriter.deleteFromUser(this);
+        return this;
+    }
+
+    public void findEpisode(List<Flag> flags) {
+        if (flags.isEmpty()) return;
+        setVodFlag(flags.get(0).getFlag());
+        if (!flags.get(0).getEpisodes().isEmpty()) {
+            Episode episode = flags.get(0).getEpisodes().get(0);
+            setVodRemarks(episode.getName());
+            setEpisodeUrl(episode.getUrl());
+        }
+        if (!canMergeByName()) return;
+        for (History item : findByName(getVodName())) {
+            if (getPosition() > 0) break;
+            for (Flag flag : flags) {
+                Episode episode = flag.find(item.getEpisode(), true);
+                if (episode == null) continue;
+                item.copyTo(this);
+                setVodFlag(flag.getFlag());
+                setPosition(item.getPosition());
+                setVodRemarks(episode.getName());
+                setEpisodeUrl(episode.getUrl());
+                break;
+            }
+        }
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof History it)) return false;
+        return Objects.equals(getKey(), it.getKey());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getKey());
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return App.gson().toJson(this);
+    }
+
+    @Override
+    public boolean isSameItem(History other) {
+        return equals(other);
+    }
+
+    @Override
+    public boolean isSameContent(History other) {
+        return getVodName().equals(other.getVodName()) && getVodPic().equals(other.getVodPic()) && getWallPic().equals(other.getWallPic())
+                && getCreateTime() == other.getCreateTime() && getPosition() == other.getPosition()
+                && getDuration() == other.getDuration() && getVodRemarks().equals(other.getVodRemarks());
+    }
+
+    // ============ YingTu 保留（本地独有，仍有调用者；上游无此字段/方法） ============
+    // 旧版影图 History 的公开字段：PlayActivity.buildHistory() 写，
+    // DetailActivity/HistoryActivity/HistoryAdapter 读。上游用 key
+    //（sourceKey + AppDatabase.SYMBOL + vodId）派生 getSiteKey()/getVodId()，
+    // 这几个字段与上游的 vodFlag/vodRemarks 是两套并存的旧数据，
+    // Room 会把它们存为额外列，不影响 DAO 查询。
+    public String sourceKey;
+    public String vodId;
+    public int playFlag;
+    public int playIndex;
+    public String episodeName;
+
+    /** 旧版 key 拼法：与上游一致用 AppDatabase.SYMBOL（"@@@"）。旧 "@@" 键查不到，属一次性迁移。 */
+    public static String buildKey(String sourceKey, String vodId) {
+        return sourceKey + AppDatabase.SYMBOL + vodId;
+    }
+
+    /** 已观看百分比（0-100），无时长时返回 0；HistoryAdapter 在用。 */
+    public int percent() {
+        if (getDuration() <= 0) return 0;
+        long p = Math.min(getPosition(), getDuration());
+        return (int) (p * 100 / getDuration());
+    }
+
+    /** HistoryHelper.save() 在写 Hawk 前刷新 updateTime；上游只有 getUpdateTime()，此处补一个 setter。 */
+    public void setUpdateTime(long updateTime) {
+        this.updateTime = updateTime;
     }
 }

@@ -1,26 +1,28 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/mobile/java/com/fongmi/android/tv/ui/dialog/ReceiveDialog.java，包名已改写为 com.yingtu.plus
 package com.yingtu.plus.ui.dialog;
 
-import android.app.Activity;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewbinding.ViewBinding;
 
+import com.yingtu.plus.api.config.VodConfig;
+import com.yingtu.plus.bean.History;
+import com.yingtu.plus.databinding.DialogReceiveBinding;
 import com.yingtu.plus.event.CastEvent;
+import com.yingtu.plus.impl.Callback;
+import com.yingtu.plus.ui.activity.VideoActivity;
+import com.yingtu.plus.utils.ImgUtil;
+import com.yingtu.plus.utils.Notify;
 
-/**
- * 兼容实现，待上游 webhtv 源码对齐。
- *
- * 投屏接收对话框（收到投屏事件时弹出，确认是否接播）。
- * 兼容实现只保留调用点用到的链式接口，打开后为空白对话框，不展示事件、不接播。
- */
-public class ReceiveDialog extends DialogFragment {
+public class ReceiveDialog extends BaseBottomSheetDialog {
 
+    private DialogReceiveBinding binding;
     private CastEvent event;
 
     public static ReceiveDialog create() {
@@ -32,15 +34,69 @@ public class ReceiveDialog extends DialogFragment {
         return this;
     }
 
-    public void show(Activity activity) {
-        if (activity instanceof AppCompatActivity) {
-            show(((AppCompatActivity) activity).getSupportFragmentManager(), "ReceiveDialog");
+    public void show(FragmentActivity activity) {
+        for (Fragment f : activity.getSupportFragmentManager().getFragments()) if (f instanceof ReceiveDialog) return;
+        show(activity.getSupportFragmentManager(), null);
+    }
+
+    public void show(Fragment fragment) {
+        for (Fragment f : fragment.getChildFragmentManager().getFragments()) if (f instanceof ReceiveDialog) return;
+        show(fragment.getChildFragmentManager(), null);
+    }
+
+    @Override
+    protected ViewBinding getBinding(@NonNull LayoutInflater inflater, @Nullable ViewGroup container) {
+        return binding = DialogReceiveBinding.inflate(inflater, container, false);
+    }
+
+    @Override
+    protected void initView() {
+        History item = event.history();
+        binding.name.setText(item.getVodName());
+        binding.from.setText(event.device().getName());
+        ImgUtil.load(item.getVodName(), item.getVodPic(), binding.image);
+    }
+
+    @Override
+    protected void initEvent() {
+        binding.frame.setOnClickListener(v -> onReceiveCast());
+    }
+
+    private void showProgress() {
+        binding.frame.setEnabled(false);
+        binding.play.setVisibility(View.GONE);
+        binding.progress.getRoot().setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgress() {
+        binding.frame.setEnabled(true);
+        binding.play.setVisibility(View.VISIBLE);
+        binding.progress.getRoot().setVisibility(View.GONE);
+    }
+
+    private void onReceiveCast() {
+        if (VodConfig.get().getConfig().equals(event.config())) {
+            VideoActivity.cast(requireActivity(), event.history().save(VodConfig.getCid()));
+            dismiss();
+        } else {
+            showProgress();
+            VodConfig.load(event.config(), getCallback());
         }
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return new View(requireContext());
+    private Callback getCallback() {
+        return new Callback() {
+            @Override
+            public void success() {
+                onReceiveCast();
+                hideProgress();
+            }
+
+            @Override
+            public void error(String msg) {
+                Notify.show(msg);
+                hideProgress();
+            }
+        };
     }
 }

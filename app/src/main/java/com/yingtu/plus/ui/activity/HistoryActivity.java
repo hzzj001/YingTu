@@ -64,16 +64,16 @@ public class HistoryActivity extends BaseActivity {
 
     private void openDetail(History h) {
         Intent i = new Intent(this, DetailActivity.class);
-        i.putExtra(DetailActivity.KEY_SOURCE, h.sourceKey);
-        i.putExtra(DetailActivity.KEY_VOD_ID, h.vodId);
+        i.putExtra(DetailActivity.KEY_SOURCE, h.getSiteKey());
+        i.putExtra(DetailActivity.KEY_VOD_ID, h.getVodId());
         startActivity(i);
     }
 
     private void confirmDelete(History h) {
         new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setMessage("删除「" + h.vodName + "」的观看记录？")
+                .setMessage("删除「" + h.getVodName() + "」的观看记录？")
                 .setPositiveButton("删除", (d, w) -> {
-                    HistoryHelper.delete(h.key);
+                    HistoryHelper.delete(h.getKey());
                     refresh();
                 })
                 .setNegativeButton("取消", null)

@@ -1,5 +1,6 @@
 package com.yingtu.plus.ui.adapter;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,11 +60,14 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         History item = data.get(position);
-        h.tvName.setText(item.vodName == null ? "" : item.vodName);
+        h.tvName.setText(item.getVodName() == null ? "" : item.getVodName());
 
         StringBuilder sub = new StringBuilder();
-        if (item.episodeName != null && !item.episodeName.isEmpty()) {
-            sub.append("观看至 ").append(item.episodeName);
+        // 上游 History 用 vodRemarks 记当前集（VideoActivity 写），旧 PlayActivity 写的是 episodeName 字段；优先前者。
+        String epName = item.getVodRemarks();
+        if (TextUtils.isEmpty(epName)) epName = item.episodeName;
+        if (epName != null && !epName.isEmpty()) {
+            sub.append("观看至 ").append(epName);
         }
         int percent = item.percent();
         if (percent > 0) {
@@ -73,7 +77,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.VH> {
         h.tvSub.setText(sub.toString());
 
         Glide.with(h.itemView.getContext())
-                .load(item.vodPic)
+                .load(item.getVodPic())
                 .placeholder(R.drawable.bg_poster_placeholder)
                 .error(R.drawable.bg_poster_placeholder)
                 .centerCrop()

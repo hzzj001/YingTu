@@ -117,7 +117,7 @@ public class HomeMainFragment extends BaseLazyFragment {
             }
         });
 
-        viewModel = new ViewModelProvider(this).get(SourceViewModel.class);
+        viewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SourceViewModel.class);
     }
 
     private void buildQuickGrid() {

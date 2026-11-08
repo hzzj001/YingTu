@@ -293,11 +293,11 @@ public class PlayActivity extends BaseActivity
         String key = History.buildKey(sourceKey, vodId);
         History old = HistoryHelper.find(key);
         history = old != null ? old : new History();
-        history.key = key;
+        history.setKey(key);
         history.sourceKey = sourceKey;
         history.vodId = vodId;
-        history.vodName = getIntent().getStringExtra(KEY_VOD_NAME);
-        history.vodPic = getIntent().getStringExtra(KEY_VOD_PIC);
+        history.setVodName(getIntent().getStringExtra(KEY_VOD_NAME));
+        history.setVodPic(getIntent().getStringExtra(KEY_VOD_PIC));
         history.playFlag = getIntent().getIntExtra(KEY_FLAG, 0);
         history.playIndex = getIntent().getIntExtra(KEY_INDEX, 0);
         history.episodeName = getIntent().getStringExtra(KEY_EPISODE);
@@ -803,8 +803,8 @@ public class PlayActivity extends BaseActivity
         long pos = player.getCurrentPosition();
         long dur = player.getDuration();
         if (pos > 0) {
-            history.position = pos;
-            if (dur > 0) history.duration = dur;
+            history.setPosition(pos);
+            if (dur > 0) history.setDuration(dur);
             HistoryHelper.save(history);
         }
     }

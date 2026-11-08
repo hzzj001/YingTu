@@ -169,7 +169,7 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
     }
 
     private void setViewModel() {
-        mViewModel = new ViewModelProvider(this).get(SiteViewModel.class);
+        mViewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SiteViewModel.class);
         mViewModel.getResult().observe(getViewLifecycleOwner(), this::setAdapter);
     }
 

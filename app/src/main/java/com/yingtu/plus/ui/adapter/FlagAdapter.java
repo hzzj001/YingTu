@@ -1,147 +1,107 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/mobile/java/com/fongmi/android/tv/ui/adapter/FlagAdapter.java，包名已改写为 com.yingtu.plus
 package com.yingtu.plus.ui.adapter;
 
-import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.yingtu.plus.R;
+import com.yingtu.plus.bean.Episode;
 import com.yingtu.plus.bean.Flag;
+import com.yingtu.plus.databinding.AdapterFlagBinding;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * 兼容实现，待上游 webhtv 源码对齐。
- *
- * 线路（Flag）适配器（VideoActivity 的线路条）：显示各线路名，
- * 点击切线路；记录当前选中线路（getActivated / getPosition），
- * 支持按线路名选中、切换选中、倒序。
- * 布局复用已恢复的旧线 item_series_flag。
- */
-public class FlagAdapter extends RecyclerView.Adapter<FlagAdapter.VH> {
-
-    public interface OnClickListener {
-        void onItemClick(Flag flag);
-    }
+public class FlagAdapter extends RecyclerView.Adapter<FlagAdapter.ViewHolder> {
 
     private final OnClickListener listener;
-    private final List<Flag> data = new ArrayList<>();
-    private int selectedPosition = -1;
+    private final List<Flag> mItems;
 
     public FlagAdapter(OnClickListener listener) {
         this.listener = listener;
+        this.mItems = new ArrayList<>();
+    }
+
+    public interface OnClickListener {
+
+        void onItemClick(Flag item);
     }
 
     public void addAll(List<Flag> items) {
-        data.clear();
-        if (items != null) data.addAll(items);
-        selectedPosition = -1;
-        for (int i = 0; i < data.size(); i++) {
-            if (data.get(i).isSelected()) {
-                selectedPosition = i;
-                break;
-            }
-        }
+        mItems.clear();
+        mItems.addAll(items);
         notifyDataSetChanged();
     }
 
     public void add(Flag item) {
-        if (item == null) return;
-        data.add(item);
-        notifyItemInserted(data.size() - 1);
-    }
-
-    public List<Flag> getItems() {
-        return data;
-    }
-
-    public Flag get(int position) {
-        return position >= 0 && position < data.size() ? data.get(position) : null;
-    }
-
-    /** 当前选中线路（未选中时返回 null）。 */
-    public Flag getActivated() {
-        return selectedPosition >= 0 && selectedPosition < data.size() ? data.get(selectedPosition) : null;
+        mItems.add(item);
+        notifyItemInserted(mItems.size() - 1);
     }
 
     public int getPosition() {
-        return selectedPosition;
+        for (int i = 0; i < mItems.size(); i++) if (mItems.get(i).isSelected()) return i;
+        return 0;
     }
 
-    public void setSelected(Flag item) {
-        if (item == null) return;
-        for (int i = 0; i < data.size(); i++) {
-            if (data.get(i) == item || TextUtils.equals(data.get(i).getShow(), item.getShow())) {
-                selectedPosition = i;
-                notifyDataSetChanged();
-                return;
-            }
-        }
+    public Flag get(int position) {
+        return mItems.get(position);
     }
 
-    public void setSelected(String flag) {
-        if (flag == null) return;
-        for (int i = 0; i < data.size(); i++) {
-            if (TextUtils.equals(data.get(i).getFlag(), flag) || TextUtils.equals(data.get(i).getShow(), flag)) {
-                selectedPosition = i;
-                notifyDataSetChanged();
-                return;
-            }
-        }
+    public List<Flag> getItems() {
+        return mItems;
     }
 
-    /** 切换选中到指定线路（与 setSelected 同义，调用点用它做切换）。 */
-    public void toggle(Flag item) {
-        setSelected(item);
+    public Flag getActivated() {
+        return mItems.get(getPosition());
     }
 
-    /** 倒序排列线路。 */
+    public void setSelected(Flag flag) {
+        if (!mItems.contains(flag)) flag.setFlag(mItems.get(0).getFlag());
+        for (Flag item : mItems) item.setSelected(flag);
+        notifyItemRangeChanged(0, getItemCount());
+    }
+
+    public void toggle(Episode episode) {
+        for (Flag item : mItems) item.toggle(item.isSelected(), episode);
+    }
+
     public void reverse() {
-        Collections.reverse(data);
-        if (selectedPosition >= 0) selectedPosition = data.size() - 1 - selectedPosition;
-        notifyDataSetChanged();
+        for (Flag item : mItems) Collections.reverse(item.getEpisodes());
     }
 
     public boolean isEmpty() {
-        return data.isEmpty();
+        return getItemCount() == 0;
     }
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return mItems.size();
     }
 
     @NonNull
     @Override
-    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_series_flag, parent, false);
-        return new VH(v);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ViewHolder(AdapterFlagBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VH h, int position) {
-        Flag flag = data.get(position);
-        h.tvFlag.setText(flag.getShow());
-        h.tvFlag.setSelected(position == selectedPosition);
-        h.itemView.setOnClickListener(v -> {
-            selectedPosition = h.getBindingAdapterPosition();
-            notifyDataSetChanged();
-            if (listener != null) listener.onItemClick(flag);
-        });
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Flag item = mItems.get(position);
+        holder.binding.text.setText(item.getShow());
+        holder.binding.text.setSelected(item.isSelected());
+        holder.binding.text.setOnClickListener(v -> listener.onItemClick(item));
     }
 
-    static class VH extends RecyclerView.ViewHolder {
-        final TextView tvFlag;
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        VH(@NonNull View itemView) {
-            super(itemView);
-            tvFlag = itemView.findViewById(R.id.tvFlag);
+        private final AdapterFlagBinding binding;
+
+        ViewHolder(@NonNull AdapterFlagBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
     }
 }

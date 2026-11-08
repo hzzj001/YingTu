@@ -93,7 +93,7 @@ public class SearchActivity extends BaseActivity {
         });
         rv.setAdapter(adapter);
 
-        viewModel = new ViewModelProvider(this).get(SourceViewModel.class);
+        viewModel = new ViewModelProvider(getViewModelStore(), ViewModelProvider.NewInstanceFactory.getInstance()).get(SourceViewModel.class);
         viewModel.searchResult.observe(this, movies -> {
             boolean empty = movies == null || movies.isEmpty();
             emptyView.setVisibility(empty ? View.VISIBLE : View.GONE);

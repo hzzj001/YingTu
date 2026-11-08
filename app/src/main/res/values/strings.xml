@@ -1176,4 +1176,13 @@
         <item>Fill</item>
         <item>Zoom</item>
     </string-array>
+    <!-- 影图+ 第 20 轮：ControlDialog（上游 mobile）新增引用，逐字取自上游 strings.xml -->
+    <string name="control_compact_episode_title">Compact title</string>
+    <string name="control_episode_column">Long title columns</string>
+    <string name="control_episode_column_double">Double</string>
+    <string name="control_episode_column_single">Single</string>
+    <string name="control_scale">Scale</string>
+    <string name="control_speed">Speed</string>
+    <string name="control_track">Track</string>
+    <string name="parse">Parse</string>
 </resources>

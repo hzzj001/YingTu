@@ -11,6 +11,9 @@ android {
         versionCode 32
         versionName "2.0.1"
         buildConfigField "String", "MEDIA3_VERSION", "\"1.11.0-alpha01-fongmi\""
+        // 第 20 轮：上游用 productFlavors 生成 FLAVOR_mode/FLAVOR_abi；本地不用 flavor（改 APK 输出路径会断工作流上传），改用固定值。
+        buildConfigField "String", "FLAVOR_mode", "\"mobile\""
+        buildConfigField "String", "FLAVOR_abi", "\"arm64_v8a\""
         // P0 版本修复：versionCode 32 高于已发 v1.9.22 APK 的 31，避免装到已装 1.9.22 的手机上报降级安装失败；targetSdk 保持 34 不动；compileSdk 升到 36（media3 1.11.0 的 AAR 元数据要求 minCompileSdk=36）。
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

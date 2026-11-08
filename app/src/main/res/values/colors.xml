@@ -99,4 +99,9 @@
     <color name="black_90">#E6000000</color>
     <!-- 注意：上游 fish2018/webhtv @ HEAD 4e30ffa 全树无 yellow 的定义（仅在 mobile styles.xml 的 Control 样式中引用），此处按 Material Yellow 500 标准值补 #FFEB3B -->
     <color name="yellow">#FFEB3B</color>
+    <!-- 影图+ 第 20 轮：adapter_flag/dialog_receive 链路引用 -->
+    <color name="black_10">#1A000000</color>
+    <color name="black_60">#99000000</color>
+    <!-- 注意：上游全树无 yellow_500 的定义（selector_video_text.xml 引用它），此处按 Material Yellow 500 标准值补 #FFEB3B，与本地已有 yellow 同值 -->
+    <color name="yellow_500">#FFEB3B</color>
 </resources>

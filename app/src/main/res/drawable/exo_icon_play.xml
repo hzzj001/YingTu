@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 补：media3-ui 库自带的播放图标（activity_video.xml:340 与 view_control_vod.xml:136 引用），本地无 media3-ui 依赖、上游 res 里也没有；按本地已有的 exo_icon_pause.xml 同款式手写白色三角 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M8,5.5v13l11,-6.5z"/>
+</vector>

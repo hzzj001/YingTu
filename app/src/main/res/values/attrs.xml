@@ -20,6 +20,10 @@
         <attr name="surface_type" format="enum">
             <enum name="surface_view" value="0" />
             <enum name="texture_view" value="1" />
+            <!-- 补：与 media3-ui 的 surface_type 完整枚举对齐；activity_video.xml 用了 "none"，本地原先只声明了前两项 -->
+            <enum name="spherical_gl_surface_view" value="2" />
+            <enum name="video_decoder_gl_surface_view" value="3" />
+            <enum name="none" value="4" />
         </attr>
         <attr name="shutter_background_color" format="color" />
         <attr name="resize_mode" format="enum">
@@ -29,4 +33,7 @@
         </attr>
         <attr name="keep_content_on_player_reset" format="boolean" />
     </declare-styleable>
+
+    <!-- 补：adapter_vod.xml 的 LinearProgressIndicator 用了 trackStopIndicatorSize；Material 1.11.0/1.12.0 的真包里都没有该属性（上游用 1.14.0 才有），本地升 Material 要 compileSdk 35，故在此声明；运行时 1.11.0 的进度条读不到它、用默认尺寸，只影响几 dp 外观 -->
+    <attr name="trackStopIndicatorSize" format="dimension" />
 </resources>

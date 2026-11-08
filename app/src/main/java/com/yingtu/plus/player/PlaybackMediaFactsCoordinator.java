@@ -3,7 +3,7 @@ package com.yingtu.plus.player;
 import com.yingtu.plus.player.PlaybackAutoContext.DisplayMode;
 import com.yingtu.plus.player.PlaybackAutoContext.RenderTarget;
 import com.yingtu.plus.player.PlaybackAutoContext.SessionToken;
-import com.yingtu.plus.player.engine.PlaybackFactsSnapshot;
+import com.yingtu.plus.player.engine.PlayerEngine;
 
 /**
  * 兼容实现，待上游 webhtv 源码对齐。
@@ -29,7 +29,7 @@ public final class PlaybackMediaFactsCoordinator {
     public void beginSession(SessionToken session) {
     }
 
-    public void publishEngineFacts(SessionToken session, long trackSequence, PlaybackFactsSnapshot snapshot,
+    public void publishEngineFacts(SessionToken session, long trackSequence, PlayerEngine.PlaybackFactsSnapshot snapshot,
                                    boolean acceptDecoder, long nowElapsedMs) {
     }
 

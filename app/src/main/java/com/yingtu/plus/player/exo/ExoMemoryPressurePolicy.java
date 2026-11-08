@@ -189,7 +189,7 @@ public final class ExoMemoryPressurePolicy {
             boolean snapshotUsable,
             long sampledAtElapsedMs) {
 
-        Observation {
+        public Observation {
             pressure = pressure == null
                     ? PlaybackAutoContext.MemoryPressure.UNKNOWN : pressure;
             sampledAtElapsedMs = sampledAtElapsedMs < 0 ? -1 : sampledAtElapsedMs;
@@ -223,7 +223,7 @@ public final class ExoMemoryPressurePolicy {
             long lastRecoveryStepAtElapsedMs,
             long lastObservationAtElapsedMs) {
 
-        Decision {
+        public Decision {
             baselineTargetBytes = normalizeTarget(baselineTargetBytes);
             safeTargetBytes = Math.min(
                     baselineTargetBytes,

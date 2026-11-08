@@ -1,68 +1,138 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/main/java/com/fongmi/android/tv/player/PlaybackTrace.java，包名已改写为 com.yingtu.plus。
 package com.yingtu.plus.player;
 
-import android.text.TextUtils;
+import android.os.SystemClock;
 
-/**
- * 兼容实现，待上游 webhtv 源码对齐。
- *
- * 播放链路追踪 ID（轻量诊断用）：PlayerManager / PlaySpec / 各播放引擎用它给一次播放过程打点。
- * 本实现只保留调用点用到的形态：NONE 为字符串常量、normalize 做空安全归一、log 为可变参空操作、
- * 实例方法维护一个内存中的当前 traceId 与 stage 集合（不落盘、不上报）。
- */
-public class PlaybackTrace {
+import com.github.catvod.crawler.SpiderDebug;
 
-    /** 无追踪 ID 时的占位值（字符串常量，调用点直接把它赋给 String 字段）。 */
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicLong;
+
+public final class PlaybackTrace {
+
     public static final String NONE = "none";
 
+    private static final AtomicLong SEQUENCE = new AtomicLong();
+    private final PlaybackDiagnosticSession diagnostics = new PlaybackDiagnosticSession();
+    private final EnumMap<Stage, Long> stageTimes = new EnumMap<>(Stage.class);
+    private String traceId = "";
+    private long startedAtMs = -1;
+    private long lastStageAtMs = -1;
+
     public enum Stage {
-        AUDIO_PLAYABLE, FIRST_FRAME, PARSE_COMPLETE, PREPARE, READY, REQUEST, TRACKS
+        REQUEST("request"),
+        PARSE_COMPLETE("parse-complete"),
+        PREPARE("prepare"),
+        TRACKS("tracks"),
+        READY("ready"),
+        FIRST_FRAME("first-frame"),
+        AUDIO_PLAYABLE("audio-playable");
+
+        private final String label;
+
+        Stage(String label) {
+            this.label = label;
+        }
+
+        public String label() {
+            return label;
+        }
     }
 
-    private String current = NONE;
-    private final java.util.Set<Stage> stages = new java.util.HashSet<>();
-    private final java.util.Map<Stage, Long> stageElapsed = new java.util.HashMap<>();
+    public synchronized String begin() {
+        return begin(SystemClock.elapsedRealtime());
+    }
 
-    public PlaybackTrace() {
+    synchronized String begin(long elapsedRealtimeMs) {
+        traceId = createId(elapsedRealtimeMs, SEQUENCE.incrementAndGet());
+        startedAtMs = Math.max(0, elapsedRealtimeMs);
+        lastStageAtMs = startedAtMs;
+        stageTimes.clear();
+        diagnostics.begin(traceId, startedAtMs);
+        return traceId;
+    }
+
+    public synchronized String ensure() {
+        return traceId.isEmpty() ? begin() : traceId;
+    }
+
+    synchronized String ensure(long elapsedRealtimeMs) {
+        return traceId.isEmpty() ? begin(elapsedRealtimeMs) : traceId;
+    }
+
+    public synchronized String current() {
+        return normalize(traceId);
+    }
+
+    public synchronized void clear() {
+        diagnostics.end("controller-cleared");
+        traceId = "";
+        startedAtMs = -1;
+        lastStageAtMs = -1;
+        stageTimes.clear();
+    }
+
+    public boolean mark(Stage stage, String detail) {
+        return mark(stage, SystemClock.elapsedRealtime(), detail);
+    }
+
+    synchronized boolean mark(Stage stage, long elapsedRealtimeMs, String detail) {
+        if (traceId.isEmpty() || stage == null) return false;
+        // Repeated PREPARE is a new diagnostic attempt; preserve the original startup timer semantics.
+        if (!stageTimes.containsKey(stage) || stage == Stage.PREPARE) diagnostics.stage(stage.label(), detail, elapsedRealtimeMs);
+        if (stageTimes.containsKey(stage)) return false;
+        long now = Math.max(startedAtMs, elapsedRealtimeMs);
+        long elapsedMs = Math.max(0, now - startedAtMs);
+        long deltaMs = Math.max(0, now - lastStageAtMs);
+        stageTimes.put(stage, now);
+        lastStageAtMs = Math.max(lastStageAtMs, now);
+        String suffix = detail == null || detail.isBlank() ? "" : " " + detail;
+        log("playback-stage", traceId, "stage=%s elapsed=%dms delta=%dms%s", stage.label(), elapsedMs, deltaMs, suffix);
+        return true;
+    }
+
+    synchronized long stageElapsedMs(Stage stage) {
+        Long time = stageTimes.get(stage);
+        return time == null || startedAtMs < 0 ? -1 : Math.max(0, time - startedAtMs);
+    }
+
+    synchronized boolean hasStage(Stage stage) {
+        return stageTimes.containsKey(stage);
     }
 
     public static String normalize(String traceId) {
-        return TextUtils.isEmpty(traceId) ? NONE : traceId;
+        return isValid(traceId) ? traceId : NONE;
     }
 
-    /** 诊断打点（兼容实现：不输出、不上报）。 */
-    public static void log(String tag, Object... args) {
+    public static void log(String tag, String traceId, String format, Object... args) {
+        if (!SpiderDebug.isEnabled()) return;
+        Object[] values = new Object[(args == null ? 0 : args.length) + 1];
+        values[0] = normalize(traceId);
+        if (args != null && args.length > 0) System.arraycopy(args, 0, values, 1, args.length);
+        SpiderDebug.log(tag, "trace=%s " + format, values);
     }
 
-    public String current() {
-        return current;
+    static String createId(long elapsedRealtimeMs, long sequence) {
+        long time = Math.max(0, elapsedRealtimeMs);
+        long count = Math.max(1, sequence);
+        return "p-" + Long.toString(time, 36).toLowerCase(Locale.US) + "-" + Long.toString(count, 36).toLowerCase(Locale.US);
     }
 
-    public void mark(Stage stage, String detail) {
-        if (stage == null) return;
-        stages.add(stage);
-        stageElapsed.put(stage, android.os.SystemClock.elapsedRealtime());
+    private static boolean isValid(String value) {
+        if (value == null || !value.startsWith("p-") || value.length() < 5) return false;
+        int separator = value.indexOf('-', 2);
+        if (separator <= 2 || separator >= value.length() - 1) return false;
+        return isBase36(value, 2, separator) && isBase36(value, separator + 1, value.length());
     }
 
-    public boolean hasStage(Stage stage) {
-        return stage != null && stages.contains(stage);
-    }
-
-    public long stageElapsedMs(Stage stage) {
-        Long value = stage == null ? null : stageElapsed.get(stage);
-        return value == null ? -1 : value;
-    }
-
-    public void clear() {
-        current = NONE;
-        stages.clear();
-        stageElapsed.clear();
-    }
-
-    public PlaybackTrace ensure() {
-        return this;
-    }
-
-    public PlaybackTrace begin() {
-        return this;
+    private static boolean isBase36(String value, int start, int end) {
+        for (int i = start; i < end; i++) {
+            char c = value.charAt(i);
+            if (c >= '0' && c <= '9') continue;
+            if (c >= 'a' && c <= 'z') continue;
+            return false;
+        }
+        return true;
     }
 }

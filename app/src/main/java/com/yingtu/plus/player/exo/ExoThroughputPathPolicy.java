@@ -219,7 +219,7 @@ public final class ExoThroughputPathPolicy {
             PlaybackAutoContext.Confidence confidence,
             Reason reason) {
 
-        Decision {
+        public Decision {
             trust = trust == null ? Trust.LIMITED : trust;
             confidence = confidence == null
                     ? PlaybackAutoContext.Confidence.UNKNOWN : confidence;

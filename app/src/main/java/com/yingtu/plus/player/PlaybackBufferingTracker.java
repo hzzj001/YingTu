@@ -1,103 +1,92 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/main/java/com/fongmi/android/tv/player/PlaybackBufferingTracker.java，包名已改写为 com.yingtu.plus。
 package com.yingtu.plus.player;
 
-import java.util.Locale;
-
-/**
- * 兼容实现，待上游 webhtv 源码对齐。
- *
- * 卡顿（rebuffer）追踪器：PlayerManager 在播放状态变化时喂给它当前状态，
- * 它汇总卡顿次数 / 总时长，并在卡顿开始 / 结束时产出 {@link Event}。
- * 兼容实现只做计数归零的空实现（不记录、不产出事件，update 一律返回 null），
- * 各策略据此认为“没有卡顿发生”。
- */
 public final class PlaybackBufferingTracker {
 
-    /** 一次卡顿事件。 */
-    public static final class Event {
-        public enum Type implements PlaybackAutoContext.Labeled {
-            UNKNOWN;
+    private boolean buffering;
+    private Phase activePhase;
+    private long bufferingStartedAtMs;
+    private int rebufferCount;
+    private long rebufferTotalMs;
 
-            @Override
-            public String label() {
-                return name().toLowerCase(Locale.US);
-            }
+    public Event update(boolean isBuffering, boolean startupComplete, long nowMs, int playbackState, long positionMs, long forwardBufferedMs, boolean loading) {
+        long now = Math.max(0, nowMs);
+        long position = Math.max(0, positionMs);
+        long forward = Math.max(0, forwardBufferedMs);
+        if (isBuffering) {
+            if (buffering) return null;
+            buffering = true;
+            activePhase = startupComplete ? Phase.REBUFFER : Phase.STARTUP;
+            bufferingStartedAtMs = now;
+            if (activePhase == Phase.REBUFFER) rebufferCount++;
+            return new Event(Type.START, activePhase, 0, rebufferCount, rebufferTotalMs, position, forward, loading, playbackState);
         }
-
-        public enum Phase implements PlaybackAutoContext.Labeled {
-            UNKNOWN;
-
-            @Override
-            public String label() {
-                return name().toLowerCase(Locale.US);
-            }
-        }
-
-        private final int playbackState;
-
-        public Event(int playbackState) {
-            this.playbackState = playbackState;
-        }
-
-        public Type type() {
-            return Type.UNKNOWN;
-        }
-
-        public Phase phase() {
-            return Phase.UNKNOWN;
-        }
-
-        public long durationMs() {
-            return 0;
-        }
-
-        public long rebufferCount() {
-            return 0;
-        }
-
-        public long rebufferTotalMs() {
-            return 0;
-        }
-
-        public long positionMs() {
-            return 0;
-        }
-
-        public long forwardBufferedMs() {
-            return 0;
-        }
-
-        public int playbackState() {
-            return playbackState;
-        }
-
-        public boolean loading() {
-            return false;
-        }
-    }
-
-    public PlaybackBufferingTracker() {
+        if (!buffering) return null;
+        long durationMs = Math.max(0, now - bufferingStartedAtMs);
+        if (activePhase == Phase.REBUFFER) rebufferTotalMs += durationMs;
+        Event event = new Event(Type.END, activePhase, durationMs, rebufferCount, rebufferTotalMs, position, forward, loading, playbackState);
+        buffering = false;
+        activePhase = null;
+        bufferingStartedAtMs = 0;
+        return event;
     }
 
     public void reset() {
+        buffering = false;
+        activePhase = null;
+        bufferingStartedAtMs = 0;
+        rebufferCount = 0;
+        rebufferTotalMs = 0;
     }
 
     public int getRebufferCount() {
-        return 0;
-    }
-
-    public long getRebufferTotalMs(long nowElapsedMs) {
-        return 0;
+        return rebufferCount;
     }
 
     public boolean isBuffering() {
-        return false;
+        return buffering;
     }
 
-    /**
-     * 喂入一次播放状态采样；兼容实现不记录、不产出事件，恒返回 null。
-     */
-    public Event update(boolean buffering, boolean startupComplete, long nowElapsedMs, int playbackState,
-                        long positionMs, long forwardBufferedMs, boolean loading) {
-        return null;
+    public long getRebufferTotalMs() {
+        return rebufferTotalMs;
+    }
+
+    public long getRebufferTotalMs(long nowMs) {
+        if (!buffering || activePhase != Phase.REBUFFER) return rebufferTotalMs;
+        long activeMs = Math.max(0, Math.max(0, nowMs) - bufferingStartedAtMs);
+        return rebufferTotalMs > Long.MAX_VALUE - activeMs ? Long.MAX_VALUE : rebufferTotalMs + activeMs;
+    }
+
+    public enum Type {
+        START("start"),
+        END("end");
+
+        private final String label;
+
+        Type(String label) {
+            this.label = label;
+        }
+
+        public String label() {
+            return label;
+        }
+    }
+
+    public enum Phase {
+        STARTUP("startup"),
+        REBUFFER("rebuffer");
+
+        private final String label;
+
+        Phase(String label) {
+            this.label = label;
+        }
+
+        public String label() {
+            return label;
+        }
+    }
+
+    public record Event(Type type, Phase phase, long durationMs, int rebufferCount, long rebufferTotalMs, long positionMs, long forwardBufferedMs, boolean loading, int playbackState) {
     }
 }

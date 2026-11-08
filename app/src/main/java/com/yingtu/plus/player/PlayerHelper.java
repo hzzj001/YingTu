@@ -1,70 +1,130 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/main/java/com/fongmi/android/tv/player/PlayerHelper.java，包名已改写为 com.yingtu.plus。
 package com.yingtu.plus.player;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import androidx.media3.common.C;
+import androidx.media3.common.Format;
+import androidx.media3.common.MimeTypes;
+import androidx.media3.common.util.Util;
+
+import com.yingtu.plus.App;
+import com.yingtu.plus.BuildConfig;
+import com.yingtu.plus.setting.Setting;
+import com.yingtu.plus.utils.FileUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.StringJoiner;
+import java.util.function.LongConsumer;
+import java.util.function.Supplier;
 
-/**
- * 兼容实现，待上游 webhtv 源码对齐。
- *
- * 播放页用到的几个小工具（字幕 mime 推断、格式描述、默认 UA、Header 转 Bundle、系统分享/选择器、外播结果回填）。
- * 调用点只要求签名对得上、返回安全默认值；不实现真实的分享/外播逻辑。
- */
-public final class PlayerHelper {
-
-    private PlayerHelper() {
-    }
-
-    /** 按字幕文件名后缀推断 mime；未知返回空串。 */
-    public static String getSubtitleMimeType(String name) {
-        if (TextUtils.isEmpty(name)) return "";
-        String lower = name.toLowerCase(java.util.Locale.US);
-        if (lower.endsWith(".vtt")) return "text/vtt";
-        if (lower.endsWith(".srt")) return "application/x-subrip";
-        if (lower.endsWith(".ass") || lower.endsWith(".ssa")) return "text/x-ssa";
-        if (lower.endsWith(".ttml") || lower.endsWith(".xml")) return "application/ttml+xml";
-        return "";
-    }
-
-    /** 格式描述（日志/比对用）；兼容实现直接返回原值。 */
-    public static String describeFormat(String format) {
-        return format == null ? "" : format;
-    }
+public class PlayerHelper {
 
     public static String getDefaultUa() {
-        return "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36";
+        return Util.getUserAgent(App.get(), BuildConfig.APPLICATION_ID);
     }
 
-    /** 请求头转 Media3 RequestMetadata 用的 Bundle；空入参返回空 Bundle。 */
+    public static String getUa() {
+        return resolveUa(Setting.getUa(), PlayerHelper::getDefaultUa);
+    }
+
+    public static String resolveUa(String ua, Supplier<String> fallback) {
+        return TextUtils.isEmpty(ua) ? fallback.get() : ua;
+    }
+
+    public static String getSubtitleMimeType(String path) {
+        if (TextUtils.isEmpty(path)) return "";
+        if (path.endsWith(".vtt")) return MimeTypes.TEXT_VTT;
+        if (path.endsWith(".ssa") || path.endsWith(".ass")) return MimeTypes.TEXT_SSA;
+        if (path.endsWith(".ttml") || path.endsWith(".xml") || path.endsWith(".dfxp")) return MimeTypes.APPLICATION_TTML;
+        return MimeTypes.APPLICATION_SUBRIP;
+    }
+
     public static Bundle toBundle(Map<String, String> headers) {
         Bundle bundle = new Bundle();
-        if (headers != null) {
-            for (Map.Entry<String, String> entry : headers.entrySet()) {
-                if (entry.getKey() != null) bundle.putString(entry.getKey(), entry.getValue());
-            }
-        }
+        headers.forEach(bundle::putString);
         return bundle;
     }
 
-    /** 弹出系统分享/打开方式选择器（兼容实现：不做任何事）。 */
-    public static void choose(Activity activity, String url, Map<String, String> headers, boolean isVod, long position, CharSequence title) {
+    public static String describeFormat(Format format) {
+        StringJoiner joiner = new StringJoiner(",");
+        if (format.id != null) joiner.add(format.id);
+        if (format.label != null) joiner.add(format.label);
+        if (format.codecs != null) joiner.add(format.codecs);
+        if (format.language != null) joiner.add(format.language);
+        if (format.sampleMimeType != null) joiner.add(format.sampleMimeType);
+        if (format.containerMimeType != null) joiner.add(format.containerMimeType);
+        if (format.width != C.LENGTH_UNSET) joiner.add(String.valueOf(format.width));
+        if (format.height != C.LENGTH_UNSET) joiner.add(String.valueOf(format.height));
+        if (format.sampleRate != C.RATE_UNSET_INT) joiner.add(String.valueOf(format.sampleRate));
+        if (format.channelCount != C.LENGTH_UNSET) joiner.add(String.valueOf(format.channelCount));
+        if (format.averageBitrate != C.LENGTH_UNSET) joiner.add(String.valueOf(format.averageBitrate));
+        return joiner.toString();
     }
 
-    /** 系统分享当前播放地址（兼容实现：不做任何事）。 */
     public static void share(Activity activity, String url, Map<String, String> headers, CharSequence title) {
+        try {
+            if (url == null || url.isEmpty()) return;
+            Bundle bundle = toBundle(headers);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(Intent.EXTRA_TEXT, url);
+            intent.putExtra("extra_headers", bundle);
+            intent.putExtra("title", title).putExtra("name", title);
+            intent.setType("text/plain");
+            activity.startActivity(getChooser(intent));
+        } catch (Exception ignored) {
+        }
     }
 
-    /**
-     * 外播选择器返回后的回填（兼容实现：不做任何事）。
-     *
-     * @param data         选择器返回的 Intent（可能为 null）
-     * @param dispatchNext 选中“下一个”时的回调
-     * @param seekTo       回填播放进度时的回调（单位毫秒）
-     */
-    public static void onExternalResult(Intent data, Runnable dispatchNext, Consumer<Long> seekTo) {
+    public static void choose(Activity activity, String url, Map<String, String> headers, boolean isVod, long position, CharSequence title) {
+        try {
+            if (url == null || url.isEmpty()) return;
+            List<String> list = new ArrayList<>();
+            headers.forEach((key, value) -> {
+                list.add(key);
+                list.add(value);
+            });
+            Uri data = url.startsWith("file://") || url.startsWith("/") ? FileUtil.getShareUri(url) : Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setDataAndType(data, "video/*");
+            intent.putExtra("title", title).putExtra("return_result", isVod);
+            intent.putExtra("headers", list.toArray(String[]::new));
+            if (isVod) intent.putExtra("position", (int) position);
+            activity.startActivityForResult(getChooser(intent), 1001);
+        } catch (Exception ignored) {
+        }
+    }
+
+    public static void onExternalResult(Intent data, Runnable onNext, LongConsumer seekTo) {
+        try {
+            if (data == null || data.getExtras() == null) return;
+            long position = data.getExtras().getInt("position", 0);
+            String endBy = data.getExtras().getString("end_by", "");
+            if ("playback_completion".equals(endBy)) App.post(onNext);
+            if ("user".equals(endBy)) seekTo.accept(position);
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static Intent getChooser(Intent intent) {
+        List<ComponentName> components = new ArrayList<>();
+        for (ResolveInfo resolveInfo : App.get().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)) {
+            String pkgName = resolveInfo.activityInfo.packageName;
+            if (pkgName.equals(App.get().getPackageName())) {
+                components.add(new ComponentName(pkgName, resolveInfo.activityInfo.name));
+            }
+        }
+        return Intent.createChooser(intent, null).putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, components.toArray(new ComponentName[0]));
     }
 }

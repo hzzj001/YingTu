@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 第 18 轮临时占位图：上游对应文件为 app/src/mobile/res/drawable-nodpi/wallpaper_design_21_crystal_sky.webp（二进制 .webp，快照推送无法上传），先用纯色 shape 顶替同名 drawable 以便编译通过；颜色 #FF7890C5 取自上游 Setting.getBuiltInWallColor() 对应墙值（wallpaper_1 用 CustomWallView 的 GREEN_WALL_COLOR）。以后走 GitHub 网页上传真图替换本文件。 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FF7890C5" />
+</shape>

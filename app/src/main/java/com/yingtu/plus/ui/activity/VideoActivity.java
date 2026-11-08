@@ -1469,7 +1469,8 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
 
     @Override
     public void onItemClick(Episode item) {
-        if (shouldEnterFullscreen(item)) return;
+        // 第 28 轮：原来点某一集会先强制进全屏（横屏）才播，可可反馈这是个问题。
+        // 改为点集数直接播，不强制横屏；想全屏再按全屏按钮、双击画面或转手机。
         syncCurrentAudioPlaylistMetadata();
         Flag flag = getFlag();
         if (mFlagAdapter != null) mFlagAdapter.toggle(item);

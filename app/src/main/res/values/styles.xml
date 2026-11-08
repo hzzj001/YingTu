@@ -106,6 +106,14 @@
         <item name="android:textAppearanceLargePopupMenu">@style/ToolbarPopupTextAppearance</item>
         <item name="android:textAppearanceSmallPopupMenu">@style/ToolbarPopupTextAppearance</item>
     </style>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/styles.xml @ HEAD 4e30ffa -->
+    <style name="ToolbarPopupMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/shape_toolbar_popup</item>
+    </style>
+    <style name="ToolbarPopupTextAppearance" parent="TextAppearance.AppCompat.Widget.PopupMenu.Large">
+        <item name="android:textColor">#18333A</item>
+        <item name="android:textSize">15sp</item>
+    </style>
     <!-- 注意：上游 fish2018/webhtv @ HEAD 4e30ffa 全树无此二 style 的定义（仅 Java 引用，含影图已有的 VideoActivity:3642），属上游遗留缺口；此处仅以 Material3 父主题补最小定义使链接通过，未改对话框逻辑。 -->
     <style name="ThemeOverlay_WebHTV_LightDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog" />
     <style name="Theme_WebHTV_LightDialog" parent="Theme.Material3.Light.Dialog" />

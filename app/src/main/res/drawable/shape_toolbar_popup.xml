@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 移植自上游 fish2018/webhtv app/src/mobile/res/drawable/shape_toolbar_popup.xml @ HEAD 4e30ffa（2026-10-07），内容未改。 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#F2FFFFFF" />
+    <stroke
+        android:width="1dp"
+        android:color="@color/white_60" />
+    <corners android:radius="8dp" />
+    <padding
+        android:bottom="6dp"
+        android:left="0dp"
+        android:right="0dp"
+        android:top="6dp" />
+</shape>

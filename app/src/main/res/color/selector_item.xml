@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 移植自上游 fish2018/webhtv app/src/mobile/res/color/selector_item.xml @ HEAD 4e30ffa（2026-10-07），内容未改。 -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:alpha="0.65" android:color="?attr/colorSecondaryContainer" android:state_selected="true" />
+    <item android:alpha="0.15" android:color="@color/black" />
+</selector>

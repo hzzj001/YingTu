@@ -95,4 +95,8 @@
     <color name="grey_500">#9E9E9E</color>
     <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/colors.xml @ HEAD 4e30ffa -->
     <color name="black_50">#80000000</color>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/colors.xml @ HEAD 4e30ffa -->
+    <color name="black_90">#E6000000</color>
+    <!-- 注意：上游 fish2018/webhtv @ HEAD 4e30ffa 全树无 yellow 的定义（仅在 mobile styles.xml 的 Control 样式中引用），此处按 Material Yellow 500 标准值补 #FFEB3B -->
+    <color name="yellow">#FFEB3B</color>
 </resources>

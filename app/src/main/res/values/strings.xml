@@ -918,4 +918,6 @@
     <string name="sync_wait_remote">Waiting for the selected device to send data...</string>
     <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
     <string name="vod_home">Home</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="device_scan">Please scan QR Code to bind</string>
 </resources>

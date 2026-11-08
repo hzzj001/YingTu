@@ -5,7 +5,7 @@ import com.yingtu.plus.player.PlaybackRoute;
 import com.yingtu.plus.player.PlaybackRouteCapabilities;
 
 /** Conservative mapping from F-02/F-04 facts to throughput control eligibility. */
-final class ExoThroughputPathPolicy {
+public final class ExoThroughputPathPolicy {
 
     private ExoThroughputPathPolicy() {
     }

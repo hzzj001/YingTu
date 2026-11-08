@@ -3,7 +3,7 @@ package com.yingtu.plus.player.exo;
 import com.yingtu.plus.player.PlaybackAutoContext;
 
 /** Pure EXO policy for immediate memory degradation and delayed tier recovery. */
-final class ExoMemoryPressurePolicy {
+public final class ExoMemoryPressurePolicy {
 
     static final long NORMAL_STABLE_WINDOW_MS = 30_000L;
     static final long MODERATE_COOLDOWN_MS = 30_000L;

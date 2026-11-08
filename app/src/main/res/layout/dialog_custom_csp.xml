@@ -204,7 +204,7 @@
 
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
-    <com.fongmi.android.tv.ui.custom.CustomNestedScrollView
+    <com.yingtu.plus.ui.custom.CustomNestedScrollView
         android:id="@+id/contentScroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -236,7 +236,7 @@
                 app:hintEnabled="false"
                 app:hintTextColor="#5F6368">
 
-                <com.fongmi.android.tv.ui.custom.SafeScrollEditText
+                <com.yingtu.plus.ui.custom.SafeScrollEditText
                     android:id="@+id/jsonText"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -264,7 +264,7 @@
 
         </FrameLayout>
 
-    </com.fongmi.android.tv.ui.custom.CustomNestedScrollView>
+    </com.yingtu.plus.ui.custom.CustomNestedScrollView>
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/footer"

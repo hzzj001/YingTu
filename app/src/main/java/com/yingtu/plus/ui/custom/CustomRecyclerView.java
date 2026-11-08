@@ -1,4 +1,4 @@
-/* 移植自上游 webhtv (https://github.com/fish2018/webhtv, HEAD 4e30ffa)：包名 com.fongmi.android.tv -> com.yingtu.plus，逻辑未改。 */
+// 移植自上游 fish2018/webhtv（commit 4e30ffa），包名 com.fongmi.android.tv.ui.custom → com.yingtu.plus.ui.custom。
 package com.yingtu.plus.ui.custom;
 
 import android.content.Context;

@@ -32,12 +32,77 @@ android {
         buildConfig = true
         viewBinding = true
     }
+
+    // jdtech libmpv 自带 FFmpeg 7.1.1 的 .so（libavcodec/libavutil/libswresample/libswscale），
+    // 与 libs 里 nextlib-media3ext AAR 自带的 FFmpeg 6.0 同名同路径；
+    // 不加 pickFirsts 会在 mergeDebugNativeLibs 报重复文件。声明顺序在前者优先（nextlib 先声明），
+    // 即 FFmpeg 6.0 的副本进包：ExoPlayer 的 ffmpeg 扩展用它；旧 mpv 核心（MpvPlayerCore）
+    // 建在 7.1.1 上，运行时加载到 6.0 副本有缺符号风险——旧核心本就只是过渡，默认播放器是 Exo。
+    packagingOptions {
+        jniLibs {
+            pickFirsts += ['lib/arm64-v8a/libavcodec.so', 'lib/arm64-v8a/libavutil.so',
+                           'lib/arm64-v8a/libswresample.so', 'lib/arm64-v8a/libswscale.so',
+                           'lib/armeabi-v7a/libavcodec.so', 'lib/armeabi-v7a/libavutil.so',
+                           'lib/armeabi-v7a/libswresample.so', 'lib/armeabi-v7a/libswscale.so',
+                           'lib/x86/libavcodec.so', 'lib/x86/libavutil.so',
+                           'lib/x86/libswresample.so', 'lib/x86/libswscale.so',
+                           'lib/x86_64/libavcodec.so', 'lib/x86_64/libavutil.so',
+                           'lib/x86_64/libswresample.so', 'lib/x86_64/libswscale.so']
+        }
+    }
 }
 
 // 禁用 AAR 元数据检查（nextlib AAR 的 minCompileSdk=37，CI 的 SDK 仓库无 android-37 包）
 tasks.matching { it.name == 'checkDebugAarMetadata' || it.name == 'checkReleaseAarMetadata' }.configureEach {
     enabled = false
     onlyIf { false }
+}
+
+// 构建时下载二进制依赖（二进制文件不能进仓库：快照推送只接受 UTF-8 文本；
+// CI 机器是临时的，每次都要拉）。文件已存在且非零时跳过，避免重复下载。
+def ensureDownloaded(String url, File dest) {
+    if (dest.exists() && dest.length() > 0) {
+        logger.lifecycle("已存在，跳过下载: ${dest}")
+        return
+    }
+    dest.parentFile.mkdirs()
+    logger.lifecycle("下载 ${url} -> ${dest}")
+    new URL(url).withInputStream { input ->
+        dest.withOutputStream { output ->
+            output << input
+        }
+    }
+    if (!dest.exists() || dest.length() == 0) {
+        throw new GradleException("下载失败，文件为空: ${url}")
+    }
+}
+
+tasks.register('downloadIjkNativeLibs') {
+    doLast {
+        // ijk 播放器 .so（上游 fish2018/webhtv 仓库，commit 4e30ffa），约 17MB；
+        // IjkMediaPlayer 只加载 ijkffmpeg / ijksdl / ijkplayer 三个。
+        def base = 'https://raw.githubusercontent.com/fish2018/webhtv/4e30ffa/app/src/main/jniLibs'
+        ['arm64-v8a', 'armeabi-v7a'].each { abi ->
+            ['libijkffmpeg.so', 'libijkplayer.so', 'libijksdl.so'].each { name ->
+                ensureDownloaded("${base}/${abi}/${name}", file("src/main/jniLibs/${abi}/${name}"))
+            }
+        }
+    }
+}
+
+tasks.register('downloadVendorAars') {
+    doLast {
+        // 迅雷 / 鉴片 / forcetech / tvbus 四个闭源 AAR（上游 app/libs，commit 4e30ffa），约 10MB；
+        // hook-release.aar 不用（Hook 类本地已有源码，Chromium 无人引用）。
+        def base = 'https://raw.githubusercontent.com/fish2018/webhtv/4e30ffa/app/libs'
+        ['forcetech-release', 'jianpian-release', 'thunder-release', 'tvbus-release'].each { name ->
+            ensureDownloaded("${base}/${name}.aar", file("libs/${name}.aar"))
+        }
+    }
+}
+
+tasks.named('preBuild') {
+    dependsOn 'downloadIjkNativeLibs', 'downloadVendorAars'
 }
 
 dependencies {
@@ -89,10 +154,21 @@ dependencies {
     implementation 'androidx.media3:media3-session:1.11.0-alpha01-fongmi'
     implementation 'androidx.media3:media3-ui:1.11.0-alpha01-fongmi'
     implementation 'androidx.media3:media3-ui-danmaku:1.11.0-alpha01-fongmi'
-    // 旧 mpv 核心 MpvPlayerCore 用 dev.jdtech.mpv.MPVLib（Maven Central 有 1.0.0，自带 libmpv.so 与 libplayer.so）。
-    implementation 'dev.jdtech.mpv:libmpv:1.0.0'
+    // 旧 mpv 核心 MpvPlayerCore 用 dev.jdtech.mpv.MPVLib。1.0.0 的 MPVLib.class 是 Java 21 编的，
+    // 工作流 JDK 17 读不了（Build #9 报错 class file has wrong version 65.0, should be 61.0），
+    // 降到 0.5.1（class 版本 52=Java 8，已用 javap 核对 MpvPlayerCore 全部用法都在 0.5.1 里）。
+    implementation 'dev.jdtech.mpv:libmpv:0.5.1'
     // MpvHlsProxy 与 WebServer 用 NanoHTTPD（上游 libs.versions.toml:46 同款 2.3.1，Maven Central 有）。
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
+    // CustomWallView 用 androidx.palette 与 android-gif-drawable（上游 libs.versions.toml 同款：palette 1.0.0、androidGifDrawable 1.2.31）。
+    implementation 'androidx.palette:palette:1.0.0'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.31'
+    // Youtube.java 用 NewPipeExtractor（上游 libs.versions.toml:47 同款 v0.26.3，JitPack；settings.gradle 已有 jitpack 仓库）。
+    // 已知风险：JitPack 之前出现过 401，若 CI 再报 401 需另想办法。
+    implementation 'com.github.TeamNewPipe:NewPipeExtractor:v0.26.3'
+    // 迅雷 / 鉴片 / forcetech / tvbus 四个 AAR 由 downloadVendorAars 任务在 preBuild 前下载到 libs/；
+    // nextlib AAR 已在上面用 files() 单独引入，这里排除它，避免同一 AAR 依赖两次。
+    implementation fileTree(dir: "libs", include: ["*.aar"], exclude: ["nextlib-media3ext-1.10.0-0.12.1-fongmi-softload.aar"])
     implementation project(':catvod')
     implementation project(':quickjs')
 }

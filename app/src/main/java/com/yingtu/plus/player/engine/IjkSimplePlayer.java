@@ -21,7 +21,7 @@ import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
 import androidx.media3.common.Player.Commands;
-import androidx.media3.common.Player.PositionSupplier;
+import androidx.media3.common.SimpleBasePlayer.PositionSupplier;
 import androidx.media3.common.SimpleBasePlayer;
 import androidx.media3.common.SimpleBasePlayer.MediaItemData;
 import androidx.media3.common.SimpleBasePlayer.State;

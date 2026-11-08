@@ -11,6 +11,9 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        // 上游 fish2018/webhtv 自带的 Maven 仓库（third_party/maven，HEAD 4e30ffa），
+        // 含 media3 分叉版 1.11.0-alpha01-fongmi 全部 17 个模块；raw.githubusercontent.com 可直接取。
+        maven { url = uri("https://raw.githubusercontent.com/fish2018/webhtv/4e30ffa/third_party/maven") }
     }
 }
 rootProject.name = "YingTu"

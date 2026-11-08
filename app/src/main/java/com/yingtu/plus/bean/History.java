@@ -1,5 +1,9 @@
 package com.yingtu.plus.bean;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.yingtu.plus.Constant;
 import com.yingtu.plus.api.config.VodConfig;
 import com.yingtu.plus.db.AppDatabase;
@@ -8,12 +12,19 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 播放/观看历史记录。本地 Hawk 持久化，用于「观看历史」页与续播。
+ * 播放/观看历史记录。Room 实体（供 HistoryDao 查询），用于「观看历史」页与续播。
  */
+@Entity
 public class History implements Serializable {
 
     /** 唯一键：sourceKey + "@@" + vodId */
+    @NonNull
+    @PrimaryKey
     public String key;
+    /** 配置 ID（HistoryDao 按 cid 查，见 History.get(cid)） */
+    public int cid;
+    /** 创建时间戳（毫秒；HistoryDao 按 createTime 过滤最近记录） */
+    public long createTime;
     public String sourceKey;
     public String vodId;
     public String vodName;

@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     namespace 'com.yingtu.plus'
-    compileSdk 34
+    compileSdk 36
     
     defaultConfig {
         applicationId "com.yingtu.plus"
@@ -10,7 +10,7 @@ android {
         targetSdk 34
         versionCode 32
         versionName "2.0.1"
-        // P0 版本修复：versionCode 32 高于已发 v1.9.22 APK 的 31，避免装到已装 1.9.22 的手机上报降级安装失败；targetSdk/compileSdk 保持 34 不动。
+        // P0 版本修复：versionCode 32 高于已发 v1.9.22 APK 的 31，避免装到已装 1.9.22 的手机上报降级安装失败；targetSdk 保持 34 不动；compileSdk 升到 36（media3 1.11.0 的 AAR 元数据要求 minCompileSdk=36）。
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     
@@ -24,6 +24,13 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // 上游 fish2018/webhtv 同款：Build #7 缺 BuildConfig（16 个文件）与 databinding 类（39 个文件），
+    // 本地无 DataBindingUtil / BR 用法，viewBinding 足以为全部布局生成 XxxBinding 类。
+    buildFeatures {
+        buildConfig = true
+        viewBinding = true
     }
 }
 
@@ -62,6 +69,30 @@ dependencies {
     implementation 'androidx.webkit:webkit:1.16.0'
     implementation 'com.google.zxing:core:3.5.4'
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    // media3 分叉版 1.11.0-alpha01-fongmi（上游 fish2018/webhtv 同款 bundle，见 gradle/libs.versions.toml:151）：
+    // Build #7 缺 androidx.media3.*，96 个文件引用；官方 1.11.0 没有分叉新增的类（MediaEdition、蓝光 ISO、弹幕、mpvplayer），
+    // 故整组用分叉版，仓库见 settings.gradle（上游 third_party/maven 的 raw URL）。
+    implementation 'androidx.media3:media3-common:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-container:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-database:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-datasource:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-datasource-okhttp:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-datasource-rtmp:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-decoder:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-effect:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-exoplayer:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-exoplayer-dash:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-exoplayer-rtsp:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-exoplayer-smoothstreaming:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-extractor:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-session:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-ui:1.11.0-alpha01-fongmi'
+    implementation 'androidx.media3:media3-ui-danmaku:1.11.0-alpha01-fongmi'
+    // 旧 mpv 核心 MpvPlayerCore 用 dev.jdtech.mpv.MPVLib（Maven Central 有 1.0.0，自带 libmpv.so 与 libplayer.so）。
+    implementation 'dev.jdtech.mpv:libmpv:1.0.0'
+    // MpvHlsProxy 与 WebServer 用 NanoHTTPD（上游 libs.versions.toml:46 同款 2.3.1，Maven Central 有）。
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
     implementation project(':catvod')
     implementation project(':quickjs')
 }

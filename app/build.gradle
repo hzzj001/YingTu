@@ -209,7 +209,12 @@ dependencies {
     // OkGlideModule 用 OkHttpUrlLoader（与本地 glide 4.16.0 同版本；上游 glide 是 5.0.7，但本地是 4.16.0，不跟升）。
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.16.0'
     // ColorGenerator 用 MDColor（上游 materialdesigncolors 1.0.0，JitPack）。
-    implementation 'com.github.bassaer:materialdesigncolors:1.0.0'
+    // 第 26 轮：该库的 POM 拖了 com.android.support:appcompat-v7:24.2.1，进而拖进整套老 Support 库
+    //（support-v4:24.2.1 → support-compat / support-media-compat），与 AndroidX core/media 类重复，
+    // Build #25 栽在 checkDebugDuplicateClasses。MDColor 本身只是颜色常量，不需要老库，排除掉。
+    implementation('com.github.bassaer:materialdesigncolors:1.0.0') {
+        exclude group: 'com.android.support'
+    }
     // DolbyVisionP81Extractor 用 LibDovi / FrameInfo 等（上游 exoplayerHdrUtils 0.4.0，Maven Central）。
     implementation 'com.suyashbelekar:exoplayerhdrutils:0.4.0'
     // BasicPitchTfliteGenerator 用 org.tensorflow.lite.Interpreter（上游 tensorflowLite 2.17.0，但该产物已迁移：

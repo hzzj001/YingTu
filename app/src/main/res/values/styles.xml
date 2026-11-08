@@ -13,6 +13,11 @@
         <item name="android:paddingEnd">16dp</item>
     </style>
 
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/styles.xml @ HEAD 4e30ffa：Vod.Grid / Vod.Circle 的隐式父样式，缺失会导致 AAPT 报 style/Vod not found -->
+    <style name="Vod">
+        <item name="cornerFamily">rounded</item>
+    </style>
+
     <!-- Vod Grid Large 样式 -->
     <style name="Vod.Grid.Large" parent="">
         <item name="android:layout_width">match_parent</item>
@@ -40,6 +45,12 @@
         <item name="android:textSize">14sp</item>
         <item name="android:padding">8dp</item>
     </style>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/styles.xml @ HEAD 4e30ffa：Player.Vod 的隐式父样式，缺失会导致 AAPT 报 style/Player not found -->
+    <style name="Player">
+        <item name="resize_mode">fit</item>
+        <item name="use_artwork">true</item>
+        <item name="use_controller">false</item>
+    </style>
     <!-- 移植自上游 webhtv：style Player.Vod -->
     <style name="Player.Vod">
         <item name="keep_content_on_player_reset">false</item>
@@ -55,6 +66,8 @@
         <item name="android:textColor">@color/white</item>
         <item name="titleTextColor">@color/white</item>
     </style>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/styles.xml @ HEAD 4e30ffa：Video.ContextText 的隐式父样式，缺失会导致 AAPT 报 style/Video not found -->
+    <style name="Video" />
     <!-- 移植自上游 webhtv：style Video.ContextText -->
     <style name="Video.ContextText">
         <item name="android:shadowColor">@color/black_90</item>

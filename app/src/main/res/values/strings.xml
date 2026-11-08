@@ -1189,6 +1189,13 @@
     <string name="control_episode_column">Long title columns</string>
     <string name="control_episode_column_double">Double</string>
     <string name="control_episode_column_single">Single</string>
+    <!-- 第 22 轮：移植自上游 webhtv mobile strings.xml:106-111（dialog_timer.xml 引用，Build #21 缺失） -->
+    <string name="timer_5">5 minutes</string>
+    <string name="timer_15">15 minutes</string>
+    <string name="timer_30">30 minutes</string>
+    <string name="timer_60">1 hour</string>
+    <string name="timer_delay">Add 5 minutes</string>
+    <string name="timer_cancel">Cancel timer</string>
     <string name="control_scale">Scale</string>
     <string name="control_speed">Speed</string>
     <string name="control_track">Track</string>

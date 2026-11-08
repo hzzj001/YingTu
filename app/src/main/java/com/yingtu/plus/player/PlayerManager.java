@@ -30,6 +30,7 @@ import androidx.media3.ui.danmaku.DanmakuController;
 import androidx.media3.mpvplayer.MpvPlayer;
 
 import com.yingtu.plus.App;
+import com.yingtu.plus.util.AppLog;
 import com.yingtu.plus.Constant;
 import com.yingtu.plus.R;
 import com.yingtu.plus.api.SiteApi;
@@ -128,6 +129,7 @@ import java.util.Map;
 public class PlayerManager implements ParseCallback {
 
     public static final String RELOAD_LUT_WARMUP = "__webhtv_lut_warmup_reload__";
+    private static final String TAG = "PlayerManager";
     private static final String NETWORK_GUARD_DEBUG = "EXO_NETWORK_GUARD";
 
     private static void logNetworkGuard(String message) {
@@ -459,7 +461,7 @@ public class PlayerManager implements ParseCallback {
         return engine instanceof ExoPlayerEngine exo ? exo.getAssSession() : null;
     }
 
-    public com.fongmi.android.tv.player.exo.subtitle.ExoSubtitleSession getSubtitleSession() {
+    public com.yingtu.plus.player.exo.subtitle.ExoSubtitleSession getSubtitleSession() {
         return engine instanceof ExoPlayerEngine exo ? exo.getSubtitleSession() : null;
     }
 
@@ -2414,7 +2416,8 @@ public class PlayerManager implements ParseCallback {
         }
         try {
             return player.isPlaying();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            AppLog.d(TAG, "isIjkPlaybackActive: 读取播放状态失败，按未在播处理", e);
             return false;
         }
     }
@@ -3179,7 +3182,8 @@ public class PlayerManager implements ParseCallback {
                 active = player.getPlaybackState() == Player.STATE_READY
                         && player.getPlayWhenReady()
                         && player.isPlaying();
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                AppLog.d(TAG, "currentIjkRuntimeSample: 读取播放状态失败，采样按未激活处理", e);
             }
         }
         boolean decodeFpsUsable = false;
@@ -3406,7 +3410,8 @@ public class PlayerManager implements ParseCallback {
                     error.getClass().getSimpleName());
             try {
                 if (engine != replacement) replacement.release();
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                AppLog.d(TAG, "switchIjkRuntimeFallback: 释放备用引擎失败，已忽略", e);
             }
             return false;
         }
@@ -4502,7 +4507,8 @@ public class PlayerManager implements ParseCallback {
             Timeline.Window window = new Timeline.Window();
             timeline.getWindow(index, window);
             return window.isSeekable;
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            AppLog.d(TAG, "isCurrentMpvMediaSeekable: 读取 seekable 失败，按不可 seek 处理", e);
             return false;
         }
     }
@@ -4511,7 +4517,8 @@ public class PlayerManager implements ParseCallback {
         if (player == null) return false;
         try {
             return player.isCurrentMediaItemLive();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            AppLog.d(TAG, "isCurrentMpvMediaLive: 读取直播状态失败，按点播处理", e);
             return false;
         }
     }
@@ -4586,7 +4593,8 @@ public class PlayerManager implements ParseCallback {
         if (TextUtils.isEmpty(option)) return 0;
         try {
             return Math.max(0, Long.parseLong(option.trim()));
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException e) {
+            AppLog.d(TAG, "optionBits: 解析数值失败 option=" + option + "，按 0 处理", e);
             return 0;
         }
     }
@@ -5212,6 +5220,7 @@ public class PlayerManager implements ParseCallback {
                 Result refreshed = SiteApi.playerContent(key, result.getFlag(), result.getUrl().v(), playerType);
                 App.post(() -> startRefreshedSwitchResult(refreshed, key, metadata));
             } catch (Throwable e) {
+                AppLog.e(TAG, "切换播放器刷新直链失败 key=%s url=%s", key, summarizeUrl(result.getUrl().v()), e);
                 App.post(() -> {
                     clearPendingSwitchRestore();
                     callback.onError(e.getMessage());
@@ -5222,6 +5231,8 @@ public class PlayerManager implements ParseCallback {
 
     private void startRefreshedSwitchResult(Result result, String key, MediaMetadata metadata) {
         if (result == null || result.hasMsg() || result.getRealUrl().isEmpty()) {
+            AppLog.w(TAG, "切换播放器刷新结果无效 key=%s msg=%s", key,
+                    result == null ? "null" : (result.hasMsg() ? result.getMsg() : "empty-url"));
             clearPendingSwitchRestore();
             callback.onError(result == null ? ResUtil.getString(R.string.error_play_url) : result.hasMsg() ? result.getMsg() : ResUtil.getString(R.string.error_play_url));
             return;
@@ -6162,6 +6173,8 @@ public class PlayerManager implements ParseCallback {
 
     @Override
     public void onParseError() {
+        AppLog.w(TAG, "解析失败 key=%s url=%s", spec == null ? "" : spec.getKey(),
+                spec == null ? "" : summarizeUrl(spec.getUrl()));
         if (pendingIjkRuntimeFallbackReparse) {
             ijkRuntimeProfileController.onSwitchStartFailed(
                     playbackAutoSession, System.currentTimeMillis());
@@ -6274,7 +6287,8 @@ public class PlayerManager implements ParseCallback {
                         && (player.isPlaying()
                         || player.getPlaybackState()
                         == Player.STATE_BUFFERING);
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                AppLog.d(TAG, "observePlaybackProfileAb: 读取播放意图失败，按未在播处理", e);
             }
         }
         boolean frameSchedulingExperimentActive = false;
@@ -6285,7 +6299,8 @@ public class PlayerManager implements ParseCallback {
                 frameSchedulingExperimentActive = frameScheduling.active()
                         && playbackTrace.current().equals(
                         frameScheduling.traceId());
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                AppLog.d(TAG, "observePlaybackProfileAb: 读取帧调度实验快照失败，按未激活处理", e);
             }
         }
         playbackProfileAbCoordinator.observe(
@@ -7675,6 +7690,8 @@ public class PlayerManager implements ParseCallback {
             }
             finishPlaybackProfileAbSession(
                     "player-error", SystemClock.elapsedRealtime());
+            AppLog.e(TAG, "播放失败，已回调 onError msg=%s spec=%s",
+                    getPlaybackErrorMessage(failure), debugSpec());
             callback.onError(getPlaybackErrorMessage(failure));
         }
     };

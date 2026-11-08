@@ -9,6 +9,7 @@ import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DataSpec;
 import androidx.media3.datasource.TransferListener;
 import androidx.media3.exoplayer.upstream.BandwidthMeter;
+import androidx.media3.exoplayer.upstream.BandwidthMeter.EventListener;
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
 
 import com.yingtu.plus.player.PlaybackAutoContext;

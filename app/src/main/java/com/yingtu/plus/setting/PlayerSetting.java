@@ -75,6 +75,11 @@ public class PlayerSetting {
     
     public static int getEpisodesColumn() { return Prefers.getInt("episode_column", 2); }
     public static void putEpisodesColumn(int n) { Prefers.put("episode_column", n); }
+
+    // 从上游 fish2018/webhtv PlayerSetting:158 移植：VideoActivity:1598 调用的单数版，
+    // 与 getEpisodesColumn() 读同一偏好键，但把取值钳制在 1~2（选集列数语义），上游 ControlDialog / EpisodeGridDialog 也调它。
+    public static int getEpisodeColumn() { return Math.min(Math.max(Prefers.getInt("episode_column", 2), 1), 2); }
+    public static void putEpisodeColumn(int column) { Prefers.put("episode_column", column == 1 ? 1 : 2); }
     
     public static boolean isDesktopLyrics() { return Prefers.getBoolean("desktop_lyrics", false); }
     public static void putDesktopLyrics(boolean v) { Prefers.put("desktop_lyrics", v); }
@@ -112,6 +117,14 @@ public class PlayerSetting {
     
     public static String getMpvRender() { return Prefers.getString("mpv_render", "gpu"); }
     
+    public static boolean isAutoPlay() {
+        return Prefers.getBoolean("player_auto_play", true);
+    }
+
+    public static void putAutoPlay(boolean autoPlay) {
+        Prefers.put("player_auto_play", autoPlay);
+    }
+
     // Helper for Prefers integration
     public static void putInt(String key, int value) { Prefers.put(key, value); }
 }

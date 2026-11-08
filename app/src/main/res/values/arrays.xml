@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/arrays.xml @ HEAD 4e30ffa -->
+    <integer-array name="cast_mode">
+        <item>@drawable/ic_sync_two</item>
+        <item>@drawable/ic_sync_upload</item>
+        <item>@drawable/ic_sync_download</item>
+    </integer-array>
+</resources>

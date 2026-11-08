@@ -1,7 +1,5 @@
 package com.github.catvod.net;
 
-import android.annotation.SuppressLint;
-
 import androidx.collection.ArrayMap;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,15 +11,9 @@ import com.github.catvod.net.interceptor.ResponseInterceptor;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
 import okhttp3.Connection;
@@ -236,7 +228,13 @@ public class OkHttp {
     }
 
     private static OkHttpClient.Builder getBuilder() {
-        OkHttpClient.Builder builder = new OkHttpClient.Builder().addInterceptor(requestInterceptor()).addInterceptor(authInterceptor()).addNetworkInterceptor(responseInterceptor()).connectTimeout(TIMEOUT, TimeUnit.MILLISECONDS).readTimeout(TIMEOUT, TimeUnit.MILLISECONDS).writeTimeout(TIMEOUT, TimeUnit.MILLISECONDS).dns(dns()).hostnameVerifier((hostname, session) -> true).sslSocketFactory(getSSLContext().getSocketFactory(), trustAllCertificates());
+        // P0 安全修复：不再自定义 hostnameVerifier / SSLSocketFactory，改用 OkHttp 默认行为，
+        // 即系统 TrustManager 校验服务器证书链 + 校验 hostname 与证书是否匹配。
+        // 此前 hostnameVerifier 恒返回 true 且 trustAllCertificates() 空实现，等于接受任意
+        // 自签/过期/错 host 证书，https 形同虚设，中间人可窃听或篡改源站抓取流量。
+        // 源站抓取仍走同一个 client：http 源站不受影响，只有 https 源站现在会被正常校验，
+        // 证书有问题的 https 源站会请求失败（而不是静默接受），这是有意为之。
+        OkHttpClient.Builder builder = new OkHttpClient.Builder().addInterceptor(requestInterceptor()).addInterceptor(authInterceptor()).addNetworkInterceptor(responseInterceptor()).connectTimeout(TIMEOUT, TimeUnit.MILLISECONDS).readTimeout(TIMEOUT, TimeUnit.MILLISECONDS).writeTimeout(TIMEOUT, TimeUnit.MILLISECONDS).dns(dns());
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
         builder.proxyAuthenticator(authenticator());
         //builder.addNetworkInterceptor(logging);
@@ -244,33 +242,8 @@ public class OkHttp {
         return builder;
     }
 
-    private static SSLContext getSSLContext() {
-        try {
-            SSLContext context = SSLContext.getInstance("TLS");
-            context.init(null, new TrustManager[]{trustAllCertificates()}, new SecureRandom());
-            return context;
-        } catch (Throwable e) {
-            return null;
-        }
-    }
-
-    @SuppressLint({"TrustAllX509TrustManager", "CustomX509TrustManager"})
-    private static X509TrustManager trustAllCertificates() {
-        return new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[0];
-            }
-        };
-    }
+    // P0 安全修复：getSSLContext() / trustAllCertificates() 已删除，不再保留接受任意证书的
+    // TrustManager。OkHttp 未配置 sslSocketFactory 时默认使用系统 TrustManager。
 
     private static class DebugEventListener extends EventListener {
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
     <string name="app_name">影图+</string>
     <string name="home_title">影图 - 本地</string>
     <string name="source_default">请选择源</string>
@@ -350,4 +350,572 @@
     <string name="web_home_extension_tab_network">web_home_extension_tab_network</string>
     <string name="web_home_extension_tab_web">web_home_extension_tab_web</string>
     <string name="web_home_extension_text_mode">web_home_extension_text_mode</string>
+    <!-- 移植自上游 webhtv：string codec_capability_short -->
+    <string name="codec_capability_short">Codec caps</string>
+    <!-- 移植自上游 webhtv：string danmaku -->
+    <string name="danmaku">Danmaku</string>
+    <!-- 移植自上游 webhtv：string detail_content -->
+    <string name="detail_content">Summary: <xliff:g name="name">%s</xliff:g></string>
+    <!-- 移植自上游 webhtv：string detail_episode -->
+    <string name="detail_episode">Episode</string>
+    <!-- 移植自上游 webhtv：string detail_flag -->
+    <string name="detail_flag">Flag</string>
+    <!-- 移植自上游 webhtv：string detail_quality -->
+    <string name="detail_quality">Quality</string>
+    <!-- 移植自上游 webhtv：string disc_menu_open -->
+    <string name="disc_menu_open">Disc menu</string>
+    <!-- 移植自上游 webhtv：string disc_menu_open_hint -->
+    <string name="disc_menu_open_hint">Open the disc top menu. Long press for navigation controls.</string>
+    <!-- 移植自上游 webhtv：string error_empty -->
+    <string name="error_empty">Nothing here 👀</string>
+    <!-- 移植自上游 webhtv：string keep -->
+    <string name="keep">Keep</string>
+    <!-- 移植自上游 webhtv：string nav_setting -->
+    <string name="nav_setting">Setting</string>
+    <!-- 移植自上游 webhtv：string pan_diagnostic_entry -->
+    <string name="pan_diagnostic_entry">Link test</string>
+    <!-- 移植自上游 webhtv：string pan_diagnostic_title -->
+    <string name="pan_diagnostic_title">Playback link diagnostics</string>
+    <!-- 移植自上游 webhtv：string play_cast -->
+    <string name="play_cast">Cast</string>
+    <!-- 移植自上游 webhtv：string play_change -->
+    <string name="play_change">Change</string>
+    <!-- 移植自上游 webhtv：string play_decode -->
+    <string name="play_decode">Hard</string>
+    <!-- 移植自上游 webhtv：string play_ed -->
+    <string name="play_ed">ED</string>
+    <!-- 移植自上游 webhtv：string play_episodes -->
+    <string name="play_episodes">Episodes</string>
+    <!-- 移植自上游 webhtv：string play_exo -->
+    <string name="play_exo">EXO</string>
+    <!-- 移植自上游 webhtv：string play_fullscreen -->
+    <string name="play_fullscreen">Fullscreen</string>
+    <!-- 移植自上游 webhtv：string play_lut -->
+    <string name="play_lut">LUT</string>
+    <!-- 移植自上游 webhtv：string play_next -->
+    <string name="play_next">Next</string>
+    <!-- 移植自上游 webhtv：string play_op -->
+    <string name="play_op">OP</string>
+    <!-- 移植自上游 webhtv：string play_params -->
+    <string name="play_params">Playback params</string>
+    <!-- 移植自上游 webhtv：string play_prev -->
+    <string name="play_prev">Prev</string>
+    <!-- 移植自上游 webhtv：string play_repeat -->
+    <string name="play_repeat">Repeat</string>
+    <!-- 移植自上游 webhtv：string play_reset -->
+    <string name="play_reset">Reset</string>
+    <!-- 移植自上游 webhtv：string play_scale -->
+    <string name="play_scale">Default</string>
+    <!-- 移植自上游 webhtv：string play_search -->
+    <string name="play_search">Search</string>
+    <!-- 移植自上游 webhtv：string play_short_display -->
+    <string name="play_short_display">Short</string>
+    <!-- 移植自上游 webhtv：string play_speed -->
+    <string name="play_speed">1.00</string>
+    <!-- 移植自上游 webhtv：string play_timer -->
+    <string name="play_timer">Timer</string>
+    <!-- 移植自上游 webhtv：string play_title -->
+    <string name="play_title">Chapter</string>
+    <!-- 移植自上游 webhtv：string play_track_audio -->
+    <string name="play_track_audio">Audio</string>
+    <!-- 移植自上游 webhtv：string play_track_text -->
+    <string name="play_track_text">Text</string>
+    <!-- 移植自上游 webhtv：string play_track_video -->
+    <string name="play_track_video">Video</string>
+    <!-- 移植自上游 webhtv：string player_audio_background -->
+    <string name="player_audio_background">Background</string>
+    <!-- 移植自上游 webhtv：string player_audio_badge_audio -->
+    <string name="player_audio_badge_audio">Audio</string>
+    <!-- 移植自上游 webhtv：string player_audio_badge_lyrics -->
+    <string name="player_audio_badge_lyrics">Lyrics</string>
+    <!-- 移植自上游 webhtv：string player_audio_badge_queue -->
+    <string name="player_audio_badge_queue">Queue</string>
+    <!-- 移植自上游 webhtv：string player_audio_more -->
+    <string name="player_audio_more">More</string>
+    <!-- 移植自上游 webhtv：string player_audio_options -->
+    <string name="player_audio_options">Playback options</string>
+    <!-- 移植自上游 webhtv：string player_immersive_audio_mode -->
+    <string name="player_immersive_audio_mode">Immersive audio mode</string>
+    <!-- 移植自上游 webhtv：string player_karaoke_mode -->
+    <string name="player_karaoke_mode">Karaoke mode</string>
+    <!-- 移植自上游 webhtv：string player_lyrics_search -->
+    <string name="player_lyrics_search">Search lyrics</string>
+    <!-- 移植自上游 webhtv：string player_osd -->
+    <string name="player_osd">On-screen display</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_failed">APK push failed: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_invalid">Select a valid APK file</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_method_link">Push by link</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_method_local">Choose local APK</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_method_target">Target: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_method_title">Push APK</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_no_space">Not enough storage to prepare the APK</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_preparing">Preparing APK...</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_progress">Pushing APK · %1$d%% · %2$s / %3$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_read_failed">Unable to read the selected APK</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_ready">Push APK · %1$s · %2$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_receiver_unsupported">The receiving device does not support APK push. Update WebHTV first.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_select_device">Push APK · Select receiving device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_success">APK sent. Confirm installation on the receiving device.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_url_failed">APK link push failed</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_url_failed_reason">APK link push failed: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_url_hint">HTTPS APK link</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_url_invalid">Enter a valid HTTPS APK link without credentials</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_url_required">Enter an HTTPS APK link</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_url_send">Send link</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_url_sent">Link sent. The TV is downloading the APK.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_url_target">Push APK link · %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="apk_push_url_unsupported">The receiving device does not support APK link push. Update WebHTV first.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="app_history">History</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="app_keep">Keep</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="control_other">Other</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="device_offline">Device is offline</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="device_select">Select devices</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="dialog_config_url">Please enter the url…</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="dialog_delete_keep">All keep records will be removed.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="dialog_delete_record">Delete all records?</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="live_refresh">Refresh</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="menu_delete">Delete</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="menu_push_apk">Push APK</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="menu_push_play">Push playback</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="menu_search">Search</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="menu_sync">Sync</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="play">Play</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="push_play_failed">Playback push failed</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="push_play_failed_reason">Playback push failed: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="push_play_select_device">Push playback · Select receiving device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="push_play_success">Playback URL sent</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="push_play_target">Push playback · %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="push_play_url_required">Enter a playback URL</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_action_config">Config</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_action_log">Log</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_action_push">Push</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_action_search">Search playback</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_action_status">Status</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_action_sync">Sync</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_add_done">Device added</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_add_short">Add</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_added_devices">Added devices</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_advanced">Advanced</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_advanced_hide">Hide advanced</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_app_version">Version</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_back_devices">Back</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_bind_code_copied">Binding code copied</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_bind_code_done">Binding code created</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_bind_code_empty">Code --</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_bind_code_expired">Binding code was not found or expired. Check that both devices use the same relay server, then enter the latest code from the target device.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_bind_code_hint">Tap the code to copy it. It is valid for a short time and can be used by the Web console or another WebHTV device.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_bind_code_inline">Code %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_bind_code_loading">Code ...</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_bind_code_unavailable">Not configured</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_bind_local_title">This device binding code</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_cap_config">Config</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_cap_device">Device trust</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_cap_log">Recent log</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_cap_push">Push</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_cap_sync">Remote sync</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_clear_message">Clear all remote trust profiles, device tokens, groups, and pending binding codes on this device?</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_code_required">Enter binding code</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_command_failed">Failed</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_command_log_title">Log</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_command_success">Success</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_command_waiting">Waiting for target device. If it is offline, the command will run after it reconnects.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_add">Add</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_add_local_summary">Local %1$s config</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_add_manual_summary">Manual %1$s config</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_current">Current</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_delete">Delete config</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_delete_message">Delete this config on the remote device?\n%1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_delete_short">Delete</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_edit">Edit</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_edit_summary">Edit %1$s config</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_home">Home site</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_home_empty">No sites found after parsing this config</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_home_label">Home: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_home_loading">Loading sites…</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_home_setting">Setting…</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_home_short">Home</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_home_status_failed">Home failed: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_home_status_setting">Setting home: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_home_status_success">Home set: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_list">List configs</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_load_failed">Failed to load configs</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_loading">Loading remote configs…</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_local_empty">No local config of this type</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_manage_hint">Remote configs</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_mode_local">Local configs</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_mode_manual">Manual input</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_name">Config name, optional</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_remote_empty">No configs on the remote device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_select">Select</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_summary">%1$s · %2$d configs</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_type_live">Live</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_type_vod">VOD</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_type_wall">Wallpaper</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_upsert">Save config</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_upsert_short">Save</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_url">Config URL</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_url_required">Enter config URL</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_use">Switch config</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_use_setting">Setting…</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_use_short">Use</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_use_status_failed">Switch failed</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_use_status_setting">Switching</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_config_use_status_success">Switched</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_controlled_device">Managed device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_copy">Copy</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_copy_diagnostics">Copy diagnostics</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_current_status_summary">%1$s · Groups %2$d · Devices %3$d</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_delete_device">Delete device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_delete_device_done">Device trust data deleted</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_delete_device_message">Delete local trust data for %1$s?</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_detect_service">Check service</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_device_id">Device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_device_list">Managed devices</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_device_offline">Offline</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_device_online">Online</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_diagnostics_copied">Diagnostics copied</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_done">Done</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_edit_server">Edit relay URL</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_empty_result">Command sent, no result yet</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_enable">Enable this relay</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_file_permission">File permission</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_file_permission_hint">File permission is recommended so trust data can be restored after reinstall.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_group_title">Group %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_keep_online">Keep remote trust online</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_local_status">This device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_no_device_selected">Select a device first</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_no_devices">No managed devices. Generate a code on the target device and add it here.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_no_profile">Save/register the relay first</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_no_self_add">Cannot add this device to itself</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_notification_title">Remote trust online</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_push_url">Push URL</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_refresh_bind_code">Refresh</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_refresh_short">Refresh</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_register_done">Remote trust registered</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_reset_local">Reset local trust data</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_result_action">Action</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_result_config_count">Configs: %1$d</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_result_copied">Result copied</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_result_log_lines">Recent logs: %1$d lines</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_result_site_count">Sites: %1$d</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_result_state">Result</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_result_status">Status</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_scan_filled">Scanned URL filled. Tap Done to save.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_scan_server">Scan</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_scan_unavailable">QR scan is unavailable on this device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_search_keyword">Search keyword</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_self_device">This device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_send_push">Push playback</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_send_search">Send search</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_send_server_done">Relay URL saved on the other device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_send_server_failed">Failed to save on the other device: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_send_server_hint">This will save the relay URL directly on the scanned device.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_send_server_save">Save to device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_send_server_title">Send relay URL</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_server_required">Enter a valid relay server URL</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_service_connect_failed">Connection failed. Check the service URL, network, or deployment status.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_service_entry">Service</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_service_error">Service unavailable</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_service_failed_with_reason">Reason: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_service_info">Mode: %1$s\nRelay: %2$s\nSupport: %3$s\nMax part: %4$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_service_memory_warning">Memory relay mode may lose bind codes across devices. Update the Cloudflare Worker Durable Object config before production use.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_service_ok">Service available</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_service_request_failed">Check failed. Copy diagnostics for details.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_service_unchecked">Service not checked</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_settings_title">Relay service</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_status_enabled">Enabled</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_status_online">Online</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_status_unbound">Unbound</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_support_none">None</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_confirm">Send this device default sync data to %1$s and overwrite related target data?</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_device">Device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_message">Info</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_missing_id">Sync task failed: missing task ID</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_part_backup">Config backup</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_part_login_state">Login state</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_part_remote_relay">Relay config</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_part_sync_files">Files</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_progress">Progress: %1$d/%2$d</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_result_counts">Restored files: %1$s, login state: %2$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_running">Syncing</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_self_forbidden">Cannot sync this device to itself</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_state_created">Waiting for this device to export data...</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_state_creating">Creating sync task...</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_state_done">Sync complete</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_state_exported">Waiting for target restore...</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_state_exporting">Uploading sync data...</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_state_failed">Sync failed</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_state_timeout">Still waiting for completion; this can time out when the target is offline or remote trust is disabled</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_step_create">Create task</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_step_current">Running</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_step_done">Done</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_step_export">Export this device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_step_failed">Failed</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_step_finish">Finish sync</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_step_line">%1$d. %2$s: %3$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_step_pending">Pending</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_step_restore">Restore on target</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_step_upload">Upload sync data</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_sync_uploaded">Uploaded</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="remote_trust_wait_devices">Device group added. Waiting for the target device to sync and come online.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="setting_enhance">Enhancements</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="setting_remote_trust">Remote trust</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="site_search_hint">Search sites…</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_cancel">Cancel sync</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_canceled">Sync canceled</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_device_mobile">Phone</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_device_tv">TV</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_failed_with_reason">Sync failed: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_mode_from_remote">Selected device -&gt; this device</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_no_device">No device found. Keep both devices on the same LAN with WebHTV open, then refresh.</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_paths_selected">Selected: %1$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_paths_selected_empty">No folders selected</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_prepare_files">Preparing sync files...</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_prepare_progress">Compressing: %1$d files, %2$s, %3$s/s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_pull">Pull</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_select_device_first">Select a device first</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_select_none">Deselect all</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_success">Sync completed</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_upload_prepare">Ready to upload: %1$d files, %2$s, compressed %3$s</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_upload_progress">%1$d%% · %2$s / %3$s · %4$s/s · %5$d files</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="sync_wait_remote">Waiting for the selected device to send data...</string>
+    <!-- 移植自上游 fish2018/webhtv app/src/mobile/res/values/strings.xml @ HEAD 4e30ffa -->
+    <string name="vod_home">Home</string>
 </resources>

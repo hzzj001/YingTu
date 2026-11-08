@@ -1,5 +1,24 @@
+<!--
+  系统备份时不参与备份的键（P0 第 3 步补充）。
+  注意：本文件目前未被 AndroidManifest 引用（既无 android:dataExtractionRules，
+  也无 android:fullBackupContent），系统备份是否实际按此排除尚未验证，见下文与
+  Manifest 中 allowBackup 处注释；接线（引用本文件）与实测留待后续步骤确认，
+  本步只把键补齐，不擅自改备份开关。
+  键名来源（均已在代码中 grep 核实，未编造）：
+  - home_api：HawkConfig.HOME_API（上次选中的源站 key；原有条目，保留）。
+  - git_cloud_accounts：Backup.include() 中按登录态归类（options.isLoginState()），
+    存 Git 云盘账号/凭据。
+  - login_state_：前缀。Backup.include() 中所有以 login_state_ 开头的
+    SharedPreferences 键都归为登录态（options.isLoginState()），登录态同步数据。
+  未列入的说明：代码里没有名为 token / cookie / auth / session 的
+  SharedPreferences 键（LoginStateSync 里的 cookie/token 等只是文件内容扫描用的
+  特征词，不是键名），故不把这些词写成键；Hawk 的键（如 api_config_cache）
+  存在 Hawk 自有存储而非 SharedPreferences，也不在此列。
+-->
 <maps>
     <map>
         <entry key="home_api" value="" />
+        <entry key="git_cloud_accounts" value="" />
+        <entry key="login_state_" value="" />
     </map>
 </maps>

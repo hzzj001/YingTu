@@ -62,6 +62,11 @@ public class Live {
     @SerializedName("jar")
     private String jar;
 
+    // 可选：本站点代码文件的 SHA-256（小写 hex），与 Site.sha256 同义；不填则不校验。
+    @Ignore
+    @SerializedName("sha256")
+    private String sha256;
+
     @Ignore
     @SerializedName("click")
     private String click;
@@ -208,6 +213,14 @@ public class Live {
 
     public void setJar(String jar) {
         this.jar = jar;
+    }
+
+    public String getSha256() {
+        return TextUtils.isEmpty(sha256) ? "" : sha256;
+    }
+
+    public void setSha256(String sha256) {
+        this.sha256 = sha256;
     }
 
     public String getClick() {
@@ -376,7 +389,8 @@ public class Live {
     }
 
     public Spider spider() {
-        return BaseLoader.get().getSpider(getName(), getApi(), getExt(), getJar());
+        // 把本站点的可选 sha256 透传给加载器验代码文件。
+        return BaseLoader.get().getSpider(getName(), getApi(), getExt(), getJar(), getSha256());
     }
 
     public Map<String, String> getHeaders() {

@@ -2,6 +2,7 @@ package com.yingtu.plus.bean;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Parcelable.Creator;
 import android.text.TextUtils;
 
 import com.yingtu.plus.App;

@@ -23,6 +23,8 @@ import com.yingtu.plus.R;
 import com.yingtu.plus.bean.Track;
 import com.yingtu.plus.player.AudioPlaybackDiagnostics;
 import com.yingtu.plus.player.PlaybackTrace;
+import com.yingtu.plus.player.engine.PlayerEngine.ErrorAction;
+import com.yingtu.plus.player.engine.PlayerEngine.VideoPlaybackDetails;
 import com.yingtu.plus.player.PlaybackResourceClassifier;
 import com.yingtu.plus.player.exo.ErrorMsgProvider;
 import com.yingtu.plus.player.exo.ExoAudioOutputState;
@@ -660,7 +662,7 @@ public class ExoPlayerEngine implements PlayerEngine {
                     format == null ? "unknown" : format.width + "x" + format.height + "/" + format.sampleMimeType);
         }
         player.setVideoEffects(effects);
-        com.fongmi.android.tv.player.exo.ExoDiagnosticCollector.effects(player, effects);
+        com.yingtu.plus.player.exo.ExoDiagnosticCollector.effects(player, effects);
     }
 
     @Override
@@ -1012,7 +1014,7 @@ public class ExoPlayerEngine implements PlayerEngine {
         ExoPerformanceSetting.beginAutoSession();
         if (!playWhenReady) player.pause();
         MediaItem item = ExoUtil.getMediaItem(spec.copyWithFormat(activeFormat), decode);
-        item = com.fongmi.android.tv.player.exo.ExoDiagnosticCollector.prepare(player, item, spec.getPlaybackTraceId());
+        item = com.yingtu.plus.player.exo.ExoDiagnosticCollector.prepare(player, item, spec.getPlaybackTraceId());
         subtitleSession.reset();
         player.setMediaItem(item, position);
         preCache.start(player, item, spec.getPlaybackTraceId(), spec.getPlaybackRoute());

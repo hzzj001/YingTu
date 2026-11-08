@@ -20,5 +20,7 @@ public class PlaybackPerformanceSetting {
     public static boolean isTrackLimitEnabled() { return Prefers.getBoolean("perf_track_limit", false); }
     public static int getMpvDv7HandlingMode() { return Prefers.getInt("perf_mpv_dv7", 0); }
     public static int getProfile() { return Prefers.getInt("perf_profile", DEFAULT_PROFILE); }
+    /** 按播放器类型取性能画像（PlayerManager / ExoUtil 的调用点均带参；暂不按类型区分）。 */
+    public static int getProfile(int playerType) { return getProfile(); }
     public static boolean hasAutomaticOptions() { return isAuto(); }
 }

@@ -8,6 +8,7 @@ import com.yingtu.plus.bean.LiveGroup;
 import com.yingtu.plus.bean.ParseBean;
 import com.yingtu.plus.bean.SnifferRule;
 import com.yingtu.plus.bean.SourceBean;
+import com.yingtu.plus.util.AppLog;
 import com.yingtu.plus.util.HawkConfig;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -56,7 +57,9 @@ public class ApiConfig {
         if (!TextUtils.isEmpty(cached)) {
             try {
                 parseConfig(cached);
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                // 缓存的订阅损坏只影响启动时直接用缓存：记日志后丢弃，本次启动不再用它。
+                AppLog.w("ApiConfig", "缓存的订阅解析失败，已忽略缓存", e);
             }
         }
     }
@@ -89,6 +92,8 @@ public class ApiConfig {
                 sb.setFilterable(optInt(obj, "filterable", 1));
                 sb.setExt(parseExt(obj));
                 sb.setJar(optString(obj, "jar"));
+                // 可选：本站点代码文件的 SHA-256（小写 hex），不填则不校验（见 CodeLoadVerifier）。
+                sb.setSha256(optString(obj, "sha256"));
                 sb.setPlayerUrl(optString(obj, "playUrl"));
                 sourceBeanList.put(sb.getKey(), sb);
             }
@@ -133,7 +138,9 @@ public class ApiConfig {
                     rule.exclude = optStringList(obj, "exclude", null);
                     if (!rule.hosts.isEmpty()) snifferRules.add(rule);
                 }
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                // 嗅探规则解析失败：已解析完的规则保留，剩余规则跳过，不让一条坏规则拖垮整个订阅。
+                AppLog.w("ApiConfig", "嗅探规则解析失败，已跳过剩余规则", e);
             }
         }
 
@@ -154,7 +161,9 @@ public class ApiConfig {
                         liveUrls.add(e.getAsString());
                     }
                 }
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                // 直播地址解析失败：已收集到的地址保留，剩余地址跳过。
+                AppLog.w("ApiConfig", "直播地址解析失败，已跳过剩余地址", e);
             }
         }
 
@@ -254,6 +263,7 @@ public class ApiConfig {
         try {
             return obj.has(key) && !obj.get(key).isJsonNull() ? obj.get(key).getAsInt() : def;
         } catch (Exception e) {
+            AppLog.d("ApiConfig", "订阅字段转整数失败 key=%s，已用默认值 %d", key, def);
             return def;
         }
     }

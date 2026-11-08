@@ -2,6 +2,7 @@ package com.yingtu.plus.bean;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Parcelable.Creator;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
@@ -62,6 +63,12 @@ public class Site implements Parcelable {
     @Ignore
     @SerializedName("jar")
     private String jar;
+
+    // 可选：本站点代码文件的 SHA-256（小写 hex）。csp_ 站点验 jar，js/py 站点验 api
+    // 代码文件；不填则不校验（只记警告，见 CodeLoadVerifier），保持与现存源站兼容。
+    @Ignore
+    @SerializedName("sha256")
+    private String sha256;
 
     @Ignore
     @SerializedName("click")
@@ -152,6 +159,8 @@ public class Site implements Parcelable {
         this.categories = in.createStringArrayList();
         this.style = in.readParcelable(Style.class.getClassLoader());
         this.selected = in.readByte() != 0;
+        // sha256 追加在末尾：不破坏已有 Parcel 字段顺序。
+        this.sha256 = in.readString();
     }
 
     public static Site objectFrom(JsonElement element, String spider) {
@@ -216,6 +225,14 @@ public class Site implements Parcelable {
 
     public void setJar(String jar) {
         this.jar = jar;
+    }
+
+    public String getSha256() {
+        return TextUtils.isEmpty(sha256) ? "" : sha256;
+    }
+
+    public void setSha256(String sha256) {
+        this.sha256 = sha256;
     }
 
     public void setClick(String click) {
@@ -448,7 +465,8 @@ public class Site implements Parcelable {
     }
 
     public Spider spider() {
-        return BaseLoader.get().getSpider(getKey(), getApi(), getExt(), getJar());
+        // 把本站点的可选 sha256 透传给加载器验代码文件。
+        return BaseLoader.get().getSpider(getKey(), getApi(), getExt(), getJar(), getSha256());
     }
 
     public void save() {
@@ -492,6 +510,8 @@ public class Site implements Parcelable {
         dest.writeStringList(this.categories);
         dest.writeParcelable(this.style, flags);
         dest.writeByte(this.selected ? (byte) 1 : (byte) 0);
+        // sha256 追加在末尾：与构造器的读取顺序保持一致。
+        dest.writeString(this.sha256);
     }
 
     public static final Creator<Site> CREATOR = new Creator<>() {

@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+    <!-- P0 安全修复说明：
+         1. 明文 http 有意保留（cleartextTrafficPermitted="true"，与 AndroidManifest 的
+            usesCleartextTraffic="true" 一致）：TVBox 源站大多只有 http、没有 https，
+            禁掉明文会让绝大多数源直接不可用。这是已知取舍：http 流量本身不加密，
+            但 https 流量仍走系统证书校验（见 OkHttp.java，不再 trust-all）。
+         2. 用户 CA 信任锚已去掉，只留 system：此前信任用户安装的 CA，等于设备上装了
+            任意用户 CA（如抓包工具的根证书）就能对本 App 的 https 做中间人，
+            抵消了证书校验的意义。只信任系统预装 CA 后，普通用户 CA 不再被信任；
+            需要抓包调试时应走系统级方案，而不是放开用户 CA。 -->
     <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
             <certificates src="system" />
-            <certificates src="user" />
         </trust-anchors>
     </base-config>
 </network-security-config>

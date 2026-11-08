@@ -1,6 +1,11 @@
 package com.yingtu.plus.bean;
 
+import com.yingtu.plus.Constant;
+import com.yingtu.plus.api.config.VodConfig;
+import com.yingtu.plus.db.AppDatabase;
+
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 播放/观看历史记录。本地 Hawk 持久化，用于「观看历史」页与续播。
@@ -28,6 +33,19 @@ public class History implements Serializable {
     public long updateTime;
 
     public History() {}
+    // 移植自上游 webhtv bean/History.java:116-138（HEAD 4e30ffa），供 SyncDialog 用；仅包名改名。
+    public static List<History> get() {
+        return get(VodConfig.getCid());
+    }
+
+    public static List<History> get(int cid) {
+        return AppDatabase.get().getHistoryDao().find(cid, System.currentTimeMillis() - Constant.HISTORY_TIME);
+    }
+
+    public static void delete(int cid) {
+        AppDatabase.get().getHistoryDao().delete(cid);
+    }
+
 
     public static String buildKey(String sourceKey, String vodId) {
         return sourceKey + "@@" + vodId;
@@ -38,5 +56,10 @@ public class History implements Serializable {
         if (duration <= 0) return 0;
         long p = Math.min(position, duration);
         return (int) (p * 100 / duration);
+    }
+
+    /** 是否可保存（上游 webhtv：position > 0 才保存；本类 position 为公开字段，等价于上游 getPosition() > 0）。 */
+    public boolean canSave() {
+        return position > 0;
     }
 }

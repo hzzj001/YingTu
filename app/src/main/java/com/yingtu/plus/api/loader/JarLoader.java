@@ -3,6 +3,7 @@ package com.yingtu.plus.api.loader;
 import android.content.Context;
 
 import com.yingtu.plus.App;
+import com.yingtu.plus.util.AppLog;
 import com.yingtu.plus.utils.Download;
 import com.yingtu.plus.utils.UrlUtil;
 import com.github.catvod.crawler.Spider;
@@ -159,6 +160,11 @@ public class JarLoader {
     }
 
     public void parseJar(String key, String jar) {
+        // 无站点上下文的入口（顶层 spider jar）：没有 sha256，走“无哈希警告后加载”。
+        parseJar(key, jar, "");
+    }
+
+    public void parseJar(String key, String jar, String sha256) {
         if (loaders.containsKey(key)) return;
         if (jar.startsWith("assets")) jar = UrlUtil.convert(jar);
         Object lock = locks.computeIfAbsent(key, k -> new Object());
@@ -166,16 +172,38 @@ public class JarLoader {
             if (loaders.containsKey(key)) return;
             String[] texts = jar.split(";md5;");
             String md5 = texts.length > 1 ? texts[1].trim() : "";
-            if (md5.startsWith("http")) md5 = OkHttp.string(md5).trim();
+            // 旧版 ;md5; 校验段的取值也可能是 URL：非 https 的哈希源不可信，丢弃该段、
+            // 退回无 md5 的下载分支（下载分支本身再做 https 门禁），不直接崩掉。
+            if (md5.startsWith("http") && !CodeLoadVerifier.isAllowed(md5)) {
+                AppLog.e("jar-loader", "jar 的 md5 来源不是 https，已丢弃该校验段 key=%s", key);
+                md5 = "";
+            } else if (md5.startsWith("http")) {
+                md5 = OkHttp.string(md5).trim();
+            }
             jar = texts[0];
             SpiderDebug.log("jar-loader", "parse start key=%s source=%s md5=%s", key, source(jar), !md5.isEmpty());
+            File file = null;
             if (!md5.isEmpty() && Util.equals(jar, md5)) {
-                load(key, Path.jar(jar));
+                file = Path.jar(jar);
             } else if (jar.startsWith("http")) {
-                load(key, Download.create(jar, Path.jar(jar)).get());
+                // P0：远程 jar 必须是 https（本机服务 http://127.0.0.1 除外），否则拒绝下载。
+                if (!CodeLoadVerifier.isAllowed(jar)) {
+                    CodeLoadVerifier.rejectNonHttps(jar, "jar-loader", "jar key=" + key);
+                    return;
+                }
+                file = Download.create(jar, Path.jar(jar)).get();
             } else if (jar.startsWith("file")) {
-                load(key, Path.local(jar));
+                file = Path.local(jar);
             }
+            if (file == null) return; // 未知来源：保持旧行为，什么都不加载
+            if (!Path.exists(file)) {
+                // 下载失败等情况：load() 本来也会跳过，这里先记一条可定位的日志。
+                AppLog.e("jar-loader", "jar 文件不存在，已拒绝加载 key=%s", key);
+                return;
+            }
+            // P0：有 sha256 才比对（不通过拒绝加载），无 sha256 记警告后照常加载。
+            if (!CodeLoadVerifier.verifyFile(file, sha256, "jar-loader", "jar key=" + key)) return;
+            load(key, file);
         }
     }
 
@@ -191,13 +219,18 @@ public class JarLoader {
     }
 
     public Spider getSpider(String key, String api, String ext, String jar) {
+        // 无站点上下文的入口：没有 sha256，走“无哈希警告后加载”。
+        return getSpider(key, api, ext, jar, "");
+    }
+
+    public Spider getSpider(String key, String api, String ext, String jar, String sha256) {
         String jaKey = Util.md5(jar);
         String spKey = jaKey + key;
         return spiders.computeIfAbsent(spKey, k -> {
             long start = System.currentTimeMillis();
             try {
                 SpiderDebug.log("jar-loader", "spider init start site=%s api=%s jar=%s ext=%s", key, api, jaKey, ext == null ? 0 : ext.length());
-                parseJar(jaKey, jar);
+                parseJar(jaKey, jar, sha256);
                 DexClassLoader loader = loaders.get(jaKey);
                 if (loader == null) {
                     SpiderDebug.log("jar-loader", "spider init skip loader missing site=%s api=%s jar=%s cost=%sms", key, api, jaKey, System.currentTimeMillis() - start);

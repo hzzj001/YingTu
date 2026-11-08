@@ -1,5 +1,6 @@
 package com.yingtu.plus.ui.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -29,6 +30,29 @@ import java.util.Set;
  * 搜索页：输入关键词 → 当前源搜索 → 网格展示结果；保留本地搜索历史。
  */
 public class SearchActivity extends BaseActivity {
+
+    // 移植自上游 webhtv mobile SearchActivity:17-36（HEAD 4e30ffa），供 VodFragment / KeepActivity 调用；仅包名改名。
+    // 注意：影图自己的 SearchActivity 目前只读 "keyword" 一个 extra，siteKey/pic/wallPic 会被忽略（见报告）。
+    public static void start(Activity activity) {
+        start(activity, "");
+    }
+
+    public static void start(Activity activity, String keyword) {
+        start(activity, keyword, null);
+    }
+
+    public static void start(Activity activity, String keyword, String siteKey) {
+        start(activity, keyword, siteKey, null, null);
+    }
+
+    public static void start(Activity activity, String keyword, String siteKey, String pic, String wallPic) {
+        Intent intent = new Intent(activity, SearchActivity.class);
+        intent.putExtra("keyword", keyword);
+        intent.putExtra("siteKey", siteKey);
+        intent.putExtra("pic", pic);
+        intent.putExtra("wallPic", wallPic);
+        activity.startActivity(intent);
+    }
 
     private EditText etKeyword;
     private ChipGroup chipHistory;

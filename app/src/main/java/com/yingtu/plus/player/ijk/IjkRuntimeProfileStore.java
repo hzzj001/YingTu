@@ -429,9 +429,9 @@ final class IjkRuntimeProfileStore {
             if (values.length != 32) return null;
             IjkRuntimeProfileKey.Key key = new IjkRuntimeProfileKey.Key(
                     values[1],
-                    com.fongmi.android.tv.player.PlaybackAutoContext.Protocol
+                    com.yingtu.plus.player.PlaybackAutoContext.Protocol
                             .valueOf(values[2]),
-                    com.fongmi.android.tv.player.PlaybackAutoContext.StreamKind
+                    com.yingtu.plus.player.PlaybackAutoContext.StreamKind
                             .valueOf(values[3]),
                     values[4],
                     values[5],
@@ -440,14 +440,14 @@ final class IjkRuntimeProfileStore {
                     Integer.parseInt(values[8]),
                     Integer.parseInt(values[9]),
                     Integer.parseInt(values[10]),
-                    com.fongmi.android.tv.player.PlaybackAutoContext.HdrType
+                    com.yingtu.plus.player.PlaybackAutoContext.HdrType
                             .valueOf(values[11]),
                     Integer.parseInt(values[12]),
                     Integer.parseInt(values[13]),
                     Integer.parseInt(values[14]),
                     parseBoolean(values[15]),
                     Integer.parseInt(values[16]),
-                    com.fongmi.android.tv.player.PlaybackAutoContext.RenderTarget
+                    com.yingtu.plus.player.PlaybackAutoContext.RenderTarget
                             .valueOf(values[17]));
             Entry entry = new Entry(
                     Integer.parseInt(values[0]),

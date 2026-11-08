@@ -1,0 +1,14 @@
+<!-- 移植自上游 fish2018/webhtv app/src/mobile/res/layout/dialog_history.xml @ HEAD 4e30ffa（2026-10-07），仅包名改名；逻辑未改。 -->
+<?xml version="1.0" encoding="utf-8"?>
+<com.yingtu.plus.ui.custom.CustomRecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/recycler"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_shell_proxy_dialog"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:overScrollMode="never"
+    android:padding="24dp"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+    app:maxHeight="376dp" />

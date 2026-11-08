@@ -211,7 +211,7 @@ public class MediaSourceFactory implements MediaSource.Factory {
         String url = mediaItem.requestMetadata.mediaUri != null ? mediaItem.requestMetadata.mediaUri.toString() : "";
         AssFontSet fonts = assSession == null ? null : assSession.beginMediaFonts();
         if (isConcatenatingUrl(url)) return createConcatenatingMediaSource(mediaItem, url);
-        if (fonts != null || mediaItem.localConfiguration != null && mediaItem.localConfiguration.tag instanceof com.fongmi.android.tv.player.PlaybackDiagnosticCollector.Context) {
+        if (fonts != null || mediaItem.localConfiguration != null && mediaItem.localConfiguration.tag instanceof com.yingtu.plus.player.PlaybackDiagnosticCollector.Context) {
             // Bind the collection to this source's extractors. Old loaders cannot populate a new video.
             // Container ASS needs its attachments even when no external subtitle was configured.
             return new DefaultMediaSourceFactory(getDataSourceFactory(), Media3DiagnosticBridge.extractors(buildExtractorsFactory(fonts), mediaItem))

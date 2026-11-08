@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 移植自上游 webhtv (https://github.com/fish2018/webhtv, HEAD 4e30ffa)：包名 com.fongmi.android.tv -> com.yingtu.plus，逻辑未改。 -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/white_60">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/black_30" />
+            <padding
+                android:bottom="8dp"
+                android:left="8dp"
+                android:right="8dp"
+                android:top="8dp" />
+        </shape>
+    </item>
+</ripple>

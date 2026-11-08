@@ -33,9 +33,9 @@ final class ExoDiagnosticAudioOutput extends ForwardingAudioOutput {
     private long epoch, calls, requested, accepted, shorts, zeros, errors, maxWriteUs, lastSummaryMs, lastWriteMs;
     private long rawHead = -1, extendedHead, lastTimestampMs;
     private long firstPts = Long.MIN_VALUE, lastPts = Long.MIN_VALUE;
-    private final com.fongmi.android.tv.player.PcmDiagnosticProbe pcmProbe = new com.fongmi.android.tv.player.PcmDiagnosticProbe();
+    private final com.yingtu.plus.player.PcmDiagnosticProbe pcmProbe = new com.yingtu.plus.player.PcmDiagnosticProbe();
     private final int pcmEncoding, pcmChannels;
-    private final com.fongmi.android.tv.player.OutputProgressDiagnostic audioProgress = new com.fongmi.android.tv.player.OutputProgressDiagnostic(false);
+    private final com.yingtu.plus.player.OutputProgressDiagnostic audioProgress = new com.yingtu.plus.player.OutputProgressDiagnostic(false);
 
     static AudioOutput wrap(AudioOutput output, AudioOutputProvider.OutputConfig config, ExoDiagnosticCollector collector) {
         return collector == null ? output : new ExoDiagnosticAudioOutput(output, config, collector);
@@ -52,13 +52,13 @@ final class ExoDiagnosticAudioOutput extends ForwardingAudioOutput {
                 });
                 return result;
             }
-            @Override public OutputConfig getOutputConfig(FormatConfig config) throws ConfigurationException {
+            @Override public OutputConfig getOutputConfig(FormatConfig config) throws AudioOutputProvider.ConfigurationException {
                 try { return super.getOutputConfig(config); }
-                catch (ConfigurationException | RuntimeException error) {
+                catch (AudioOutputProvider.ConfigurationException | RuntimeException error) {
                     collector.log.error(collector.log.context(), "audio-output", "configuration", error); throw error;
                 }
             }
-            @Override public AudioOutput getAudioOutput(OutputConfig config) throws InitializationException {
+            @Override public AudioOutput getAudioOutput(OutputConfig config) throws AudioOutputProvider.InitializationException {
                 long start = SystemClock.elapsedRealtime();
                 collector.log.emit("audio.output.lifecycle", "audio-output-provider", e -> e.observed("operation", "initialize").observed("phase", "begin"));
                 try {
@@ -66,7 +66,7 @@ final class ExoDiagnosticAudioOutput extends ForwardingAudioOutput {
                     collector.log.emit("audio.output.lifecycle", "audio-output-provider", e -> e.observed("operation", "initialize")
                             .observed("phase", "end").observed("result", "success").observed("durationMs", SystemClock.elapsedRealtime() - start));
                     return result;
-                } catch (InitializationException | RuntimeException error) {
+                } catch (AudioOutputProvider.InitializationException | RuntimeException error) {
                     collector.log.error(collector.log.context(), "audio-output", "initialize", error); throw error;
                 }
             }
@@ -79,8 +79,8 @@ final class ExoDiagnosticAudioOutput extends ForwardingAudioOutput {
         return new ForwardingAudioSink(delegate) {
             private long lastMs, calls, bytes;
             private androidx.media3.common.Format inputFormat;
-            private final com.fongmi.android.tv.player.PcmDiagnosticProbe inputProbe = new com.fongmi.android.tv.player.PcmDiagnosticProbe();
-            @Override public void configure(AudioSinkConfig config) throws ConfigurationException {
+            private final com.yingtu.plus.player.PcmDiagnosticProbe inputProbe = new com.yingtu.plus.player.PcmDiagnosticProbe();
+            @Override public void configure(AudioSinkConfig config) throws AudioSink.ConfigurationException {
                 inputFormat = config.format;
                 collector.log.emit("audio.processing", "audio-sink-config", e -> {
                     ExoDiagnosticCollector.format(e, config.format);
@@ -89,7 +89,7 @@ final class ExoDiagnosticAudioOutput extends ForwardingAudioOutput {
                 });
                 super.configure(config);
             }
-            @Override public boolean handleBuffer(ByteBuffer buffer, long pts, int count) throws InitializationException, WriteException {
+            @Override public boolean handleBuffer(ByteBuffer buffer, long pts, int count) throws AudioSink.InitializationException, AudioSink.WriteException {
                 if (!DebugLogStore.acceptsEvent("audio.processing")) return super.handleBuffer(buffer, pts, count);
                 int position = buffer.position();
                 boolean result = super.handleBuffer(buffer, pts, count);
@@ -134,7 +134,7 @@ final class ExoDiagnosticAudioOutput extends ForwardingAudioOutput {
         });
     }
 
-    @Override public boolean write(ByteBuffer buffer, int units, long pts) throws WriteException {
+    @Override public boolean write(ByteBuffer buffer, int units, long pts) throws AudioOutput.WriteException {
         if (!DebugLogStore.acceptsEvent("audio.output.write")) return super.write(buffer, units, pts);
         long generation = DebugLogStore.captureGeneration();
         if (generation != diagnosticGeneration) { diagnosticGeneration = generation; resetEpoch(); lastSummaryMs = 0; }
@@ -155,7 +155,7 @@ final class ExoDiagnosticAudioOutput extends ForwardingAudioOutput {
             }
             sample(false);
             return result;
-        } catch (WriteException error) {
+        } catch (AudioOutput.WriteException error) {
             errors++;
             event("audio.error", e -> e.severity("error").observed("stage", "write").observed("errorCode", error.errorCode)
                     .observed("recoverable", error.isRecoverable).pin(outputId + "-error"));

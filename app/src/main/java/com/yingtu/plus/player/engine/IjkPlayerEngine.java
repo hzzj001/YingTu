@@ -13,6 +13,8 @@ import com.yingtu.plus.R;
 import com.yingtu.plus.bean.Track;
 import com.yingtu.plus.player.AudioPlaybackDiagnostics;
 import com.yingtu.plus.player.PlaybackTrace;
+import com.yingtu.plus.player.engine.PlayerEngine.ErrorAction;
+import com.yingtu.plus.player.engine.PlayerEngine.RuntimeMetrics;
 import com.yingtu.plus.player.PlaybackResourceClassifier;
 import com.yingtu.plus.player.PlaybackRoute;
 import com.yingtu.plus.player.exo.ExoUtil;

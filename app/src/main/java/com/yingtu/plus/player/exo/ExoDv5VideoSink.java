@@ -16,6 +16,8 @@ import androidx.media3.common.util.Size;
 import androidx.media3.common.util.TimestampIterator;
 import androidx.media3.exoplayer.video.VideoFrameMetadataListener;
 import androidx.media3.exoplayer.video.VideoSink;
+import androidx.media3.exoplayer.video.VideoSink.Listener;
+import androidx.media3.exoplayer.video.VideoSink.VideoSinkException;
 
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;

@@ -1,5 +1,6 @@
 package com.yingtu.plus.ui.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
 
@@ -19,6 +20,11 @@ import java.util.List;
  * 点击 → 回到详情页（可继续播放），长按 → 删除该条，右上角清空全部。
  */
 public class HistoryActivity extends BaseActivity {
+
+    // 移植自上游 webhtv mobile HistoryActivity:34-36（HEAD 4e30ffa），供 VodFragment 菜单调用；仅包名改名。
+    public static void start(Activity activity) {
+        activity.startActivity(new Intent(activity, HistoryActivity.class));
+    }
 
     private HistoryAdapter adapter;
     private View emptyView;

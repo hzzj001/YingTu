@@ -3768,7 +3768,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
 
     private void onLut() {
         if (hasLutQuick()) {
-            mBinding.lutQuick.toggle(player(), mBinding.exo, this::onLutChanged, new com.fongmi.android.tv.ui.custom.LutQuickPanel.ImportCallback() {
+            mBinding.lutQuick.toggle(player(), mBinding.exo, this::onLutChanged, new com.yingtu.plus.ui.custom.LutQuickPanel.ImportCallback() {
                 @Override
                 public void onImportLut() {
                     onLutImport();

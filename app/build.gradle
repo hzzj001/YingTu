@@ -8,8 +8,9 @@ android {
         applicationId "com.yingtu.plus"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "2.0.0"
+        versionCode 32
+        versionName "2.0.1"
+        // P0 版本修复：versionCode 32 高于已发 v1.9.22 APK 的 31，避免装到已装 1.9.22 的手机上报降级安装失败；targetSdk/compileSdk 保持 34 不动。
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     
@@ -51,6 +52,14 @@ dependencies {
     implementation 'com.orhanobut:hawk:2.0.1'
     implementation 'com.google.guava:guava:33.3.1-android'
     implementation 'org.jupnp:org.jupnp:2.6.1'
+    // 从上游 fish2018/webhtv 移植（libs.lottie = com.airbnb.android:lottie:6.7.1）：
+    // view_empty.xml 里用了 LottieAnimationView（@raw/empty），缺了它空状态 inflate 就会 ClassNotFound。
+    implementation 'com.airbnb.android:lottie:6.7.1'
+    // VodFragment 移植后新增的依赖缺口（上游版本）：HomeWebController 用 androidx.webkit，
+    // ScanActivity（扫码页）用 journeyapps 的 zxing-android-embedded（上游 mobile/leanback 双 flavor 都用它）。
+    implementation 'androidx.webkit:webkit:1.16.0'
+    implementation 'com.google.zxing:core:3.5.4'
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
     implementation project(':catvod')
     implementation project(':quickjs')
 }

@@ -20,7 +20,11 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
+import androidx.media3.common.Player.Commands;
+import androidx.media3.common.Player.PositionSupplier;
 import androidx.media3.common.SimpleBasePlayer;
+import androidx.media3.common.SimpleBasePlayer.MediaItemData;
+import androidx.media3.common.SimpleBasePlayer.State;
 import androidx.media3.common.TrackGroup;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.VideoSize;
@@ -121,8 +125,8 @@ class IjkSimplePlayer extends SimpleBasePlayer implements IMediaPlayer.Listener 
     private boolean newlyRenderedFirstFrame;
     private boolean renderedFirstFrameSeen;
     private float volume;
-    private final com.fongmi.android.tv.player.PlaybackDiagnosticCollector diagnostics =
-            new com.fongmi.android.tv.player.PlaybackDiagnosticCollector("ijk", "packaged-IjkMediaPlayer");
+    private final com.yingtu.plus.player.PlaybackDiagnosticCollector diagnostics =
+            new com.yingtu.plus.player.PlaybackDiagnosticCollector("ijk", "packaged-IjkMediaPlayer");
     private String diagnosticTrace = "none";
     private long lastDiagnosticMs;
 
@@ -856,7 +860,7 @@ class IjkSimplePlayer extends SimpleBasePlayer implements IMediaPlayer.Listener 
     }
 
     private void diagnosticSnapshot() {
-        if (!com.fongmi.android.tv.player.PlaybackDiagnosticCollector.enabled()) return;
+        if (!com.yingtu.plus.player.PlaybackDiagnosticCollector.enabled()) return;
         long now = SystemClock.elapsedRealtime();
         if (now - lastDiagnosticMs < 5000) return;
         lastDiagnosticMs = now;
@@ -878,7 +882,7 @@ class IjkSimplePlayer extends SimpleBasePlayer implements IMediaPlayer.Listener 
                     .observed("bytes", ijk.getAudioCachedBytes()).observed("metricScope", "cached input bytes; not accepted output")
                     .unknown("audibility", com.github.catvod.crawler.diagnostics.DiagnosticEvent.Status.NOT_OBSERVABLE));
         }
-        com.fongmi.android.tv.player.SystemAudioDiagnosticCollector.snapshot(diagnostics, diagnostics.context());
+        com.yingtu.plus.player.SystemAudioDiagnosticCollector.snapshot(diagnostics, diagnostics.context());
     }
 
     private void requestPreload(long positionMs) {

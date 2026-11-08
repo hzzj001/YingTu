@@ -1,6 +1,7 @@
 package com.yingtu.plus.player.iso;
 
 import com.github.catvod.crawler.SpiderDebug;
+import com.yingtu.plus.player.iso.RemoteIsoSource.ReadRequest;
 
 import java.io.EOFException;
 import java.io.IOException;

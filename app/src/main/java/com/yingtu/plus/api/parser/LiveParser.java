@@ -8,6 +8,7 @@ import com.yingtu.plus.bean.ClearKey;
 import com.yingtu.plus.bean.Drm;
 import com.yingtu.plus.bean.Group;
 import com.yingtu.plus.bean.Live;
+import com.yingtu.plus.util.AppLog;
 import com.yingtu.plus.utils.UrlUtil;
 import com.github.catvod.net.OkHttp;
 import com.github.catvod.utils.Json;
@@ -19,6 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LiveParser {
+
+    private static final String TAG = "LiveParser";
 
     private static final Pattern M3U = Pattern.compile("^(?!.*#genre#).*#EXTM3U.*", Pattern.MULTILINE);
     private static final Pattern HTTP_USER_AGENT = Pattern.compile(".*http-user-agent=\"(.?|.+?)\".*");
@@ -33,6 +36,13 @@ public class LiveParser {
     private static final Pattern URL_TVG = Pattern.compile(".*url-tvg=\"(.?|.+?)\".*");
     private static final Pattern GROUP = Pattern.compile(".*group-title=\"(.?|.+?)\".*");
     private static final Pattern NAME = Pattern.compile(".*,(.+?)$");
+
+    /** 截断单行内容后记日志：直播源行可能很长，只留前 120 字定位即可。 */
+    private static String safe(String line) {
+        if (line == null) return "";
+        String text = line.trim();
+        return text.length() <= 120 ? text : text.substring(0, 120) + "...";
+    }
 
     private static String extract(String line, Pattern pattern) {
         Matcher matcher = pattern.matcher(line.trim());
@@ -225,7 +235,7 @@ public class LiveParser {
                 if (line.contains("user-agent=")) ua = line.split("(?i)user-agent=")[1].trim().replace("\"", "");
                 if (line.contains("ua=")) ua = line.split("ua=")[1].trim().replace("\"", "");
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=ua line=" + safe(line), e);
                 ua = null;
             }
         }
@@ -234,7 +244,7 @@ public class LiveParser {
             try {
                 referer = line.split("(?i)referer=")[1].trim().replace("\"", "");
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=referer line=" + safe(line), e);
                 referer = null;
             }
         }
@@ -243,7 +253,7 @@ public class LiveParser {
             try {
                 referer = line.split("(?i)referrer=")[1].trim().replace("\"", "");
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=referrer line=" + safe(line), e);
                 referer = null;
             }
         }
@@ -252,7 +262,7 @@ public class LiveParser {
             try {
                 parse = Integer.parseInt(line.split("parse=")[1].trim());
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=parse line=" + safe(line), e);
                 parse = null;
             }
         }
@@ -261,7 +271,7 @@ public class LiveParser {
             try {
                 click = line.split("click=")[1].trim();
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=click line=" + safe(line), e);
                 click = null;
             }
         }
@@ -273,7 +283,7 @@ public class LiveParser {
                 if ("mpd".equals(format) || "dash".equals(format)) format = MimeTypes.APPLICATION_MPD;
                 if ("hls".equals(format)) format = MimeTypes.APPLICATION_M3U8;
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=format line=" + safe(line), e);
                 format = null;
             }
         }
@@ -282,7 +292,7 @@ public class LiveParser {
             try {
                 header.put("Cookie", line.split("(?i)cookie=")[1].trim().replace("\"", ""));
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=cookie line=" + safe(line), e);
             }
         }
 
@@ -290,7 +300,7 @@ public class LiveParser {
             try {
                 origin = line.split("(?i)origin=")[1].trim();
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=origin line=" + safe(line), e);
                 origin = null;
             }
         }
@@ -301,7 +311,7 @@ public class LiveParser {
                 if (key.startsWith("http")) httpKey();
                 else localKey();
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=key line=" + safe(line), e);
                 key = null;
             }
         }
@@ -310,7 +320,7 @@ public class LiveParser {
             try {
                 type = line.contains("license_type=") ? line.split("license_type=")[1].trim() : line;
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=type line=" + safe(line), e);
                 type = null;
             }
         }
@@ -322,7 +332,7 @@ public class LiveParser {
                 type(split[0].trim());
                 key(split[1].trim());
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=drmLegacy line=" + safe(line), e);
                 type = null;
                 key = null;
             }
@@ -333,7 +343,7 @@ public class LiveParser {
                 if (line.contains("#EXTHTTP:")) header.putAll(Json.toMap(Json.parse(line.split("#EXTHTTP:")[1].trim())));
                 if (line.contains("header=")) header.putAll(Json.toMap(Json.parse(line.split("header=")[1].trim())));
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=header line=" + safe(line), e);
             }
         }
 
@@ -343,7 +353,7 @@ public class LiveParser {
                 else if (line.contains("|")) for (String text : line.split("\\|")) headers(text);
                 else headers(header, line.trim().split("&"));
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=headers line=" + safe(line), e);
             }
         }
 
@@ -352,7 +362,7 @@ public class LiveParser {
                 if (line.contains("|")) for (String text : line.split("\\|")) drmHeaders(text);
                 else headers(drmHeader, line.trim().split("&"));
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=drmHeaders line=" + safe(line), e);
             }
         }
 
@@ -372,7 +382,7 @@ public class LiveParser {
             try {
                 forceKey = Boolean.parseBoolean(line.split("forceKey=")[1].trim());
             } catch (Exception e) {
-                e.printStackTrace();
+                AppLog.w(TAG, "直播行解析失败 field=forceKey line=" + safe(line), e);
             }
         }
 

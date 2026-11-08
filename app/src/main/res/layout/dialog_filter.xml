@@ -1,0 +1,14 @@
+<!-- 移植自上游 fish2018/webhtv app/src/mobile/res/layout/dialog_filter.xml @ HEAD 4e30ffa（2026-10-07），仅包名改名；逻辑未改。 -->
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/recycler"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_dialog_control_glass_panel"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:overScrollMode="never"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="20dp"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />

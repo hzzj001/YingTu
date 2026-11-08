@@ -57,7 +57,19 @@ public class WebViewUtil {
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        // P0 安全修复：混合内容改兼容模式。此前 MIXED_CONTENT_ALWAYS_ALLOW 会让 https 页面
+        // 里的 http 脚本也照常执行，https 页面的安全性被 http 子资源拖垮。兼容模式只放行
+        // Chromium 认为可接受的混合内容（如图片/媒体），仍拦截 http 脚本等主动混合内容；
+        // 如个别 https 首页的图片仍加载失败，再按站点个案处理，不要直接改回 ALWAYS_ALLOW。
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+        // P0 安全修复：默认关掉 file:// 访问。file:// 页面默认就能读本地文件的话，
+        // 任意加载的本地 HTML 都可能越权读取应用私有文件；跨 file:// 访问与通用访问
+        // 更是直接允许 file:// 页面读任意本地文件并向任意来源发请求，必须关掉。
+        // 内置示例/本地 HTML 确实需要 file:// 时，由 configureHome() 再单独放开
+        // setAllowFileAccess(true)，其余场景保持关闭。
+        settings.setAllowFileAccess(false);
+        settings.setAllowFileAccessFromFileURLs(false);
+        settings.setAllowUniversalAccessFromFileURLs(false);
         settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         logSettings(webView, role);
     }
@@ -65,6 +77,19 @@ public class WebViewUtil {
     public static void configureHome(WebView webView) {
         configureBase(webView, "webhome");
         WebSettings settings = webView.getSettings();
+        // P0 安全修复说明：这里把 setAllowFileAccess 重新打开，是内置示例与本地 HTML
+        // 必须的——file:///android_asset/webhome/*.html 和 filesDir/webhome/*.html
+        // 都要靠 file:// 访问才能加载，关掉则内置示例页直接打不开。
+        // 范围限定：只放开“WebView 能加载 file:// URL”这一项；
+        // setAllowFileAccessFromFileURLs / setAllowUniversalAccessFromFileURLs
+        // 仍保持关闭（见 configureBase），file:// 页面不能互相读取本地文件、
+        // 也不能向任意来源发请求；能进 WebView 的 URL 另由 WebHomeActivity 的
+        // 白名单（shouldOverrideUrlLoading）把关，只放行内置示例、内部存储 webhome
+        // 目录与 http(s) 远程页。
+        settings.setAllowFileAccess(true);
+        // 兼容旧的 TYPE_LOCAL 条目：个别历史条目仍可能是用户 SAF 授权的 content://，
+        // 需允许 WebView 经 ContentResolver 加载；新挑的文件已复制进内部存储走 file://。
+        settings.setAllowContentAccess(true);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
         settings.setSupportZoom(false);

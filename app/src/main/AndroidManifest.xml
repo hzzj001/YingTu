@@ -22,6 +22,13 @@
         android:name="android.software.leanback"
         android:required="false" />
 
+    <!-- allowBackup 保持 true 的原因（P0 第 3 步说明）：本应用的备份/恢复走自有的
+         AppBackup（bak-*.zip + SHA-256 清单校验），且用户在换机时需要把订阅、源站、
+         播放记录等设置带走；关掉系统备份会让这部分体验直接丢失。登录态/Token 类
+         数据不靠系统备份兜底：data_extraction_rules.xml 已把登录态键
+         （git_cloud_accounts、login_state_ 前缀）排除在外，Hawk 未加密是已知遗留
+         （见 App.java），与本开关无关；如后续决定关掉，需先确认自有备份已覆盖全部
+         迁移场景，不要只改这一行。-->
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -104,9 +111,57 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="unspecified" />
 
+        <!-- 2026-11-08 quality-p0：恢复旧线 PlayActivity / LivePlayActivity（4d51378），声明与旧 Manifest 一致 -->
+        <activity
+            android:name=".ui.activity.PlayActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:screenOrientation="sensorLandscape"
+            android:theme="@style/AppTheme.Fullscreen" />
+
+        <activity
+            android:name=".ui.activity.LivePlayActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:screenOrientation="sensorLandscape"
+            android:theme="@style/AppTheme.Fullscreen" />
+
+        <!-- 2026-11-08 quality-p0：补 25 处疑似引用，新写 FolderActivity（兼容实现）配套声明 -->
+        <activity
+            android:name=".ui.activity.FolderActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="unspecified" />
+
+        <!-- 2026-11-08 VodFragment 完整移植：KeepActivity / ScanActivity 声明与上游 mobile Manifest 一致 -->
+        <activity
+            android:name=".ui.activity.KeepActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout"
+            android:screenOrientation="fullUser" />
+
+        <activity
+            android:name=".ui.activity.ScanActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout"
+            android:screenOrientation="fullUser" />
+
         <activity
             android:name=".ui.activity.WallpaperActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="unspecified" />
+
+        <!-- 2026-11-08 VodFragment 完整移植：RemoteAgentService 声明与上游 main Manifest 一致 -->
+        <service
+            android:name=".remote.RemoteAgentService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync|connectedDevice"
+            android:stopWithTask="false" />
+
+        <!-- 2026-11-08 quality-p0：PlaybackService 已换成上游 webhtv 移植版（MediaLibraryService），声明与上游一致 -->
+        <service
+            android:name=".service.PlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaLibraryService" />
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

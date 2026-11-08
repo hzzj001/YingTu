@@ -10,6 +10,7 @@ import androidx.media3.exoplayer.mediacodec.MediaCodecInfo;
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector;
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
 import androidx.media3.exoplayer.video.MediaCodecVideoRenderer;
+import androidx.media3.exoplayer.video.MediaCodecVideoRenderer.Builder;
 import androidx.media3.exoplayer.video.VideoRendererEventListener;
 
 import com.yingtu.plus.setting.PlaybackPerformanceSetting;

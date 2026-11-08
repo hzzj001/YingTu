@@ -2,6 +2,7 @@ package com.yingtu.plus;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Application.ActivityLifecycleCallbacks;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,6 +11,7 @@ import android.os.Looper;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.fongmi.hook.Hook;
 import com.google.gson.Gson;
 import com.yingtu.plus.api.ApiConfig;
 import com.yingtu.plus.util.HawkConfig;
@@ -29,6 +31,18 @@ public class App extends Application {
 
     /** 前台 Activity 跟踪（生命周期回调）。 */
     private Activity currentActivity;
+
+    /** 签名钩子（TVBus 取流前后设置 / 清除；兼容实现：只保存，不安装任何 Hook）。 */
+    private Hook hook;
+
+    /** 设置签名钩子（TVBus 调用；兼容实现：只保存，不做任何事）。 */
+    public void setHook(Hook hook) {
+        this.hook = hook;
+    }
+
+    public Hook getHook() {
+        return hook;
+    }
 
     @Override
     public void onCreate() {

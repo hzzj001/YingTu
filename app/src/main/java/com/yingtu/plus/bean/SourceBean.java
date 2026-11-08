@@ -16,6 +16,7 @@ public class SourceBean {
     private int filterable;     // 是否支持筛选
     private String ext;         // 扩展参数
     private String jar;         // spider jar
+    private String sha256;      // 可选：本站点代码文件的 SHA-256（小写 hex），不填则不校验
     private String playerUrl;
 
     public String getKey() { return key; }
@@ -44,6 +45,9 @@ public class SourceBean {
 
     public String getJar() { return jar; }
     public void setJar(String jar) { this.jar = jar; }
+
+    public String getSha256() { return sha256 == null ? "" : sha256; }
+    public void setSha256(String sha256) { this.sha256 = sha256; }
 
     public String getPlayerUrl() { return playerUrl; }
     public void setPlayerUrl(String playerUrl) { this.playerUrl = playerUrl; }

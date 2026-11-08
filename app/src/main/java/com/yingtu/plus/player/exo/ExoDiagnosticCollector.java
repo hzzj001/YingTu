@@ -43,7 +43,7 @@ public final class ExoDiagnosticCollector implements AnalyticsListener {
     private DecoderCounters videoCounters, audioCounters;
     private Context videoOwner, audioOwner;
     private long seekEpoch;
-    private final com.fongmi.android.tv.player.OutputProgressDiagnostic videoProgress = new com.fongmi.android.tv.player.OutputProgressDiagnostic(true);
+    private final com.yingtu.plus.player.OutputProgressDiagnostic videoProgress = new com.yingtu.plus.player.OutputProgressDiagnostic(true);
 
     void attach(ExoPlayer value) {
         player = new WeakReference<>(value);

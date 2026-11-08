@@ -16,6 +16,7 @@ import androidx.media3.exoplayer.ExoPlaybackException;
 import androidx.media3.exoplayer.RendererCapabilities;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.video.MediaCodecVideoRenderer;
+import androidx.media3.exoplayer.video.MediaCodecVideoRenderer.Builder;
 import androidx.media3.exoplayer.video.VideoRendererEventListener;
 
 import java.nio.ByteBuffer;

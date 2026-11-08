@@ -1,0 +1,11 @@
+<!-- 移植自上游 fish2018/webhtv app/src/mobile/res/drawable/ic_site_double_column.xml @ HEAD 4e30ffa（2026-10-07），仅包名改名；逻辑未改。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="?attr/colorControlNormal"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M3,3h8v6H3V3zM13,3h8v6h-8V3zM3,11h8v6H3v-6zM13,11h8v6h-8v-6z" />
+</vector>

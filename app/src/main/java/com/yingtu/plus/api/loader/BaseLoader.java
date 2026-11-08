@@ -56,9 +56,15 @@ public class BaseLoader {
     }
 
     public Spider getSpider(String key, String api, String ext, String jar) {
-        if (isPy(api)) return pyLoader.getSpider(key, api, ext);
-        else if (isJs(api)) return jsLoader.getSpider(key, api, ext, jar);
-        else if (isCsp(api)) return jarLoader.getSpider(key, api, ext, jar);
+        // 无站点上下文的入口：没有 sha256，走“无哈希警告后加载”。
+        return getSpider(key, api, ext, jar, "");
+    }
+
+    public Spider getSpider(String key, String api, String ext, String jar, String sha256) {
+        // sha256 归属：csp_ 站点验 jar 文件，js/py 站点验 api 代码文件，见各 Loader 注释。
+        if (isPy(api)) return pyLoader.getSpider(key, api, ext, sha256);
+        else if (isJs(api)) return jsLoader.getSpider(key, api, ext, jar, sha256);
+        else if (isCsp(api)) return jarLoader.getSpider(key, api, ext, jar, sha256);
         else return new SpiderNull();
     }
 
@@ -84,9 +90,14 @@ public class BaseLoader {
     }
 
     public void parseJar(String jar, boolean recent) {
+        // 顶层 spider jar：没有站点上下文、没有 sha256，走“无哈希警告后加载”。
+        parseJar(jar, recent, "");
+    }
+
+    public void parseJar(String jar, boolean recent, String sha256) {
         if (TextUtils.isEmpty(jar)) return;
         String key = Util.md5(jar);
-        jarLoader.parseJar(key, jar);
+        jarLoader.parseJar(key, jar, sha256);
         if (recent) jarLoader.setRecent(key);
     }
 

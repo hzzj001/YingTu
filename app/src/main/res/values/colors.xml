@@ -79,4 +79,20 @@
     <color name="dialog_toggle_button_text">#FFFFFFFF</color>
     <color name="dialog_tonal_button_bg">#FF333333</color>
     <color name="dialog_tonal_button_text">#FFBDBDBD</color>
+    <!-- 移植自上游 webhtv：color black_20 -->
+    <color name="black_20">#33000000</color>
+    <!-- 移植自上游 webhtv：color black_30 -->
+    <color name="black_30">#4D000000</color>
+    <!-- 移植自上游 webhtv：color black_80 -->
+    <color name="black_80">#CC000000</color>
+    <!-- 移植自上游 webhtv：color white_60 -->
+    <color name="white_60">#99FFFFFF</color>
+    <!-- 移植自上游 webhtv：color white_70 -->
+    <color name="white_70">#B3FFFFFF</color>
+    <!-- 移植自上游 webhtv：color white_90 -->
+    <color name="white_90">#E6FFFFFF</color>
+    <!-- 注意：上游 webhtv 同样未定义 grey_500（仅在 view_widget_vod/live 中引用），此处按 Material Grey 500 标准值补 #9E9E9E -->
+    <color name="grey_500">#9E9E9E</color>
+    <!-- 移植自上游 fish2018/webhtv app/src/main/res/values/colors.xml @ HEAD 4e30ffa -->
+    <color name="black_50">#80000000</color>
 </resources>

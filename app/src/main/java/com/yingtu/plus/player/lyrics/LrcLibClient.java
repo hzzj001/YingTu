@@ -72,7 +72,7 @@ public class LrcLibClient {
         Request request = new Request.Builder().url(url).header("User-Agent", USER_AGENT).build();
         try (Response response = CLIENT.newCall(request).execute()) {
             if (!response.isSuccessful() || response.body() == null) return null;
-            return com.fongmi.android.tv.App.gson().fromJson(response.body().string(), type);
+            return com.yingtu.plus.App.gson().fromJson(response.body().string(), type);
         } catch (Exception e) {
             if (SpiderDebug.isEnabled()) SpiderDebug.log(TAG, "lrclib request failed url=%s error=%s", url, e.getMessage());
             return null;

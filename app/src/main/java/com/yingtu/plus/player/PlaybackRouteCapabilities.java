@@ -1,72 +1,75 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/main/java/com/fongmi/android/tv/player/PlaybackRouteCapabilities.java，包名已改写为 com.yingtu.plus。
 package com.yingtu.plus.player;
 
-import java.util.Locale;
-
-/**
- * 兼容实现，待上游 webhtv 源码对齐。
- *
- * 路由能力（由路由结论推导出的链路特征）：播放器看到的是哪一段链路、上游是否可见、
- * 控制范围到哪里。兼容实现只按结论返回“未知”档，不做真实的链路探测。
- */
-public final class PlaybackRouteCapabilities {
-
-    public enum ObservedLeg implements PlaybackAutoContext.Labeled {
-        PLAYER_TO_REMOTE_HTTP, UNKNOWN;
-
-        @Override
-        public String label() {
-            return name().toLowerCase(Locale.US);
-        }
-    }
-
-    public enum UpstreamVisibility implements PlaybackAutoContext.Labeled {
-        APP_SERVICE_PATH, UNKNOWN;
-
-        @Override
-        public String label() {
-            return name().toLowerCase(Locale.US);
-        }
-    }
-
-    public enum ControlScope implements PlaybackAutoContext.Labeled {
-        UNKNOWN;
-
-        @Override
-        public String label() {
-            return name().toLowerCase(Locale.US);
-        }
-    }
-
-    private final PlaybackRoute.Resolution resolution;
-
-    private PlaybackRouteCapabilities(PlaybackRoute.Resolution resolution) {
-        this.resolution = resolution;
-    }
+public record PlaybackRouteCapabilities(ObservedLeg observedLeg, UpstreamVisibility upstreamVisibility, ControlScope controlScope) {
 
     public static PlaybackRouteCapabilities resolve(PlaybackRoute.Resolution resolution) {
-        return new PlaybackRouteCapabilities(resolution);
+        PlaybackRoute.Resolution route = resolution == null ? PlaybackRoute.resolve(null) : resolution;
+        return switch (route.route()) {
+            case DIRECT_REMOTE_HTTP -> new PlaybackRouteCapabilities(ObservedLeg.PLAYER_TO_REMOTE_HTTP, UpstreamVisibility.REQUEST_LEVEL_ONLY, ControlScope.PLAYER_REQUEST_OPTIONS);
+            case APP_LOCAL_SERVICE -> new PlaybackRouteCapabilities(ObservedLeg.APP_TO_OWNED_LOCAL_SERVICE, UpstreamVisibility.APP_SERVICE_PATH, ControlScope.APP_OWNED_SERVICE_CODE);
+            case EXTERNAL_LOOPBACK_PROXY -> new PlaybackRouteCapabilities(ObservedLeg.APP_TO_LOCAL_ENDPOINT_ONLY, UpstreamVisibility.OPAQUE_EXTERNAL_PROCESS, ControlScope.NONE);
+            default -> new PlaybackRouteCapabilities(ObservedLeg.SOURCE_SPECIFIC, UpstreamVisibility.UNKNOWN, ControlScope.NONE);
+        };
     }
 
-    public ObservedLeg observedLeg() {
-        return ObservedLeg.UNKNOWN;
-    }
-
-    public UpstreamVisibility upstreamVisibility() {
-        return UpstreamVisibility.UNKNOWN;
-    }
-
-    public ControlScope controlScope() {
-        return ControlScope.UNKNOWN;
-    }
-
-    /** 上游是否不透明（本地服务之外的远端链路默认视为不透明）。 */
     public boolean externalUpstreamOpaque() {
-        return resolution == null || resolution.route() != PlaybackRoute.APP_LOCAL_SERVICE;
+        return upstreamVisibility == UpstreamVisibility.OPAQUE_EXTERNAL_PROCESS;
     }
 
     public String logSummary() {
-        return "leg=" + observedLeg().label()
-                + " upstream=" + upstreamVisibility().label()
-                + " scope=" + controlScope().label();
+        return "observedLeg=" + observedLeg.label() +
+                " upstreamVisibility=" + upstreamVisibility.label() +
+                " controlScope=" + controlScope.label();
+    }
+
+    public enum ObservedLeg {
+        PLAYER_TO_REMOTE_HTTP("player-to-remote-http"),
+        APP_TO_OWNED_LOCAL_SERVICE("app-to-owned-local-service"),
+        APP_TO_LOCAL_ENDPOINT_ONLY("app-to-local-endpoint-only"),
+        SOURCE_SPECIFIC("source-specific");
+
+        private final String label;
+
+        ObservedLeg(String label) {
+            this.label = label;
+        }
+
+        public String label() {
+            return label;
+        }
+    }
+
+    public enum UpstreamVisibility {
+        REQUEST_LEVEL_ONLY("request-level-only"),
+        APP_SERVICE_PATH("app-service-path"),
+        OPAQUE_EXTERNAL_PROCESS("opaque-external-process"),
+        UNKNOWN("unknown");
+
+        private final String label;
+
+        UpstreamVisibility(String label) {
+            this.label = label;
+        }
+
+        public String label() {
+            return label;
+        }
+    }
+
+    public enum ControlScope {
+        PLAYER_REQUEST_OPTIONS("player-request-options"),
+        APP_OWNED_SERVICE_CODE("app-owned-service-code"),
+        NONE("none");
+
+        private final String label;
+
+        ControlScope(String label) {
+            this.label = label;
+        }
+
+        public String label() {
+            return label;
+        }
     }
 }

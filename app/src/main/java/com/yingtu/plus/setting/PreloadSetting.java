@@ -210,7 +210,5 @@ public class PreloadSetting {
         return closest;
     }
 
-    // ---- YingTu 保留：本地独有，PreCache 调用带参版 ----
-    public static int getPreloadAheadDurationMs() { return Prefers.getInt("preload_ahead_ms", DEFAULT_AHEAD_SECONDS * 1000); }
-    public static int getPreloadAheadDurationMs(int kernel) { return getPreloadAheadDurationMs(); }
 }
+

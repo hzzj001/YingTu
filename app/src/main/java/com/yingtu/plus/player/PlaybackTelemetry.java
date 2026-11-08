@@ -1,270 +1,273 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/main/java/com/fongmi/android/tv/player/PlaybackTelemetry.java，包名已改写为 com.yingtu.plus。
 package com.yingtu.plus.player;
 
-import com.yingtu.plus.player.PlaybackAutoContext.Confidence;
-import com.yingtu.plus.player.PlaybackAutoContext.PlaybackPhase;
-import com.yingtu.plus.player.PlaybackAutoContext.ValueSource;
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * 兼容实现，待上游 webhtv 源码对齐。
- *
- * 播放决策遥测的数据结构：各策略做决策时把“决策域 / 结果 / 输入事实”记成
- * {@link DecisionEvent}，把周期性运行状态记成 {@link RuntimeObservation}，
- * 交 {@link PlaybackTelemetryCoordinator} 发布。兼容实现只保留数据结构本身，
- * 不做任何上报、采样或持久化。
- */
+/** Bounded, privacy-safe inputs shared by decision logs and runtime telemetry. */
 public final class PlaybackTelemetry {
 
     private PlaybackTelemetry() {
     }
 
-    /** 诊断标签安全化（去空白、去非法字符）；空输入返回 "unknown"。 */
-    public static String safeLabel(String label) {
-        if (label == null) return "unknown";
-        String value = label.trim().replaceAll("[^A-Za-z0-9_.-]+", "_");
-        return value.isEmpty() ? "unknown" : value;
+    public static String safeLabel(String value) {
+        return DecisionInput.safeValue(value);
     }
 
-    public enum DecisionDomain implements PlaybackAutoContext.Labeled {
-        CACHE, IJK_BUFFER, IJK_DECODE_PRESSURE, IJK_REALTIME_RECOVERY, IJK_RUNTIME_PROFILE,
-        LOAD_CONTROL, MPV_BACK_CACHE, MPV_CACHE, MPV_FORWARD_CACHE, MPV_HLS_VARIANT,
-        MPV_OUTPUT, MPV_PRELOAD, MPV_RESOURCE_PRESSURE, NETWORK_PROTECTION, PRELOAD,
-        RTSP_LIVE_RECOVERY, THROUGHPUT;
+    public record Metric<T>(T value, PlaybackAutoContext.ValueSource source,
+                           PlaybackAutoContext.Confidence confidence) {
 
-        @Override
-        public String label() {
-            return name().toLowerCase(Locale.US);
-        }
-    }
-
-    public enum DecisionOutcome implements PlaybackAutoContext.Labeled {
-        APPLIED, FAILED, HELD, OBSERVED, REQUESTED, SELECTED, SUPPRESSED;
-
-        @Override
-        public String label() {
-            return name().toLowerCase(Locale.US);
-        }
-    }
-
-    /** 一项决策输入事实（键 + 值 + 来源 + 置信度）。 */
-    public static final class DecisionInput {
-        private final String name;
-        private final Object value;
-
-        private DecisionInput(String name, Object value) {
-            this.name = name == null ? "" : name;
-            this.value = value;
-        }
-
-        public static DecisionInput bool(String name, boolean value, ValueSource source, Confidence confidence) {
-            return new DecisionInput(name, value);
-        }
-
-        public static DecisionInput bool(String name, boolean value, String source, String confidence) {
-            return new DecisionInput(name, value);
-        }
-
-        public static DecisionInput number(String name, long value, ValueSource source, Confidence confidence) {
-            return new DecisionInput(name, value);
-        }
-
-        public static DecisionInput number(String name, long value, String source, String confidence) {
-            return new DecisionInput(name, value);
-        }
-
-        public static DecisionInput unknown(String name) {
-            return new DecisionInput(name, null);
-        }
-
-        public static DecisionInput decimal(String name, double value, ValueSource source, Confidence confidence) {
-            return new DecisionInput(name, value);
-        }
-
-        public static DecisionInput text(String name, String value, String source, String confidence) {
-            return new DecisionInput(name, value);
-        }
-
-        public static DecisionInput text(String name, String value, ValueSource source, Confidence confidence) {
-            return new DecisionInput(name, value);
-        }
-
-        public String name() {
-            return name;
-        }
-
-        public Object value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return name + "=" + value;
-        }
-    }
-
-    /** 一次决策事件（域 / 结果 / 会话 / 组件 / 动作 / 详情 / 输入事实列表）。 */
-    public static final class DecisionEvent {
-        private final DecisionDomain domain;
-        private final DecisionOutcome outcome;
-        private final String first;
-        private final String second;
-        private final String third;
-        private final String fourth;
-        private final String fifth;
-        private final List<DecisionInput> inputs;
-
-        public DecisionEvent(DecisionDomain domain, DecisionOutcome outcome,
-                             String first, String second, String third, String fourth, String fifth,
-                             List<DecisionInput> inputs) {
-            this.domain = domain;
-            this.outcome = outcome;
-            this.first = first;
-            this.second = second;
-            this.third = third;
-            this.fourth = fourth;
-            this.fifth = fifth;
-            this.inputs = inputs;
-        }
-
-        public DecisionDomain domain() {
-            return domain;
-        }
-
-        public DecisionOutcome outcome() {
-            return outcome;
-        }
-
-        public List<DecisionInput> inputs() {
-            return inputs;
-        }
-    }
-
-    /** 一个带来源与置信度的度量值。 */
-    public static final class Metric<T> {
-        private final T value;
-        private final ValueSource source;
-        private final Confidence confidence;
-
-        private Metric(T value, ValueSource source, Confidence confidence) {
-            this.value = value;
-            this.source = source == null ? ValueSource.UNKNOWN : source;
-            this.confidence = confidence == null ? Confidence.UNKNOWN : confidence;
-        }
-
-        public static <T> Metric<T> of(T value, ValueSource source, Confidence confidence) {
-            return new Metric<>(value, source, confidence);
+        public Metric {
+            source = source == null ? PlaybackAutoContext.ValueSource.UNKNOWN : source;
+            confidence = confidence == null ? PlaybackAutoContext.Confidence.UNKNOWN : confidence;
+            if (value == null || source == PlaybackAutoContext.ValueSource.UNKNOWN
+                    || confidence == PlaybackAutoContext.Confidence.UNKNOWN) {
+                value = null;
+                source = PlaybackAutoContext.ValueSource.UNKNOWN;
+                confidence = PlaybackAutoContext.Confidence.UNKNOWN;
+            }
         }
 
         public static <T> Metric<T> unknown() {
-            return new Metric<>(null, ValueSource.UNKNOWN, Confidence.UNKNOWN);
+            return new Metric<>(null, PlaybackAutoContext.ValueSource.UNKNOWN,
+                    PlaybackAutoContext.Confidence.UNKNOWN);
+        }
+
+        public static <T> Metric<T> of(T value, PlaybackAutoContext.ValueSource source,
+                                       PlaybackAutoContext.Confidence confidence) {
+            return new Metric<>(value, source, confidence);
         }
 
         public boolean known() {
-            return value != null;
-        }
-
-        public T value() {
-            return value;
-        }
-
-        public ValueSource source() {
-            return source;
-        }
-
-        public Confidence confidence() {
-            return confidence;
+            return value != null && source != PlaybackAutoContext.ValueSource.UNKNOWN
+                    && confidence != PlaybackAutoContext.Confidence.UNKNOWN;
         }
     }
 
-    /** 一次周期性运行状态采样（全部为 Metric 包装的度量值）。 */
-    public static final class RuntimeObservation {
-        private final Metric<PlaybackPhase> phase;
-        private final Metric<Boolean> playing;
-        private final Metric<Long> position;
-        private final Metric<Long> duration;
-        private final Metric<Long> buffered;
-        private final Metric<Long> bandwidth;
-        private final Metric<Long> mediaBitrate;
-        private final Metric<Float> renderedFrameRate;
-        private final Metric<Long> droppedFrames;
-        private final Metric<Integer> rebufferCount;
-        private final Metric<Long> rebufferTotalMs;
-        private final Metric<Long> firstFrameMs;
-        private final Metric<Long> liveLagMs;
+    public record RuntimeObservation(
+            Metric<PlaybackAutoContext.PlaybackPhase> phase,
+            Metric<Boolean> loading,
+            Metric<Long> positionMs,
+            Metric<Long> durationMs,
+            Metric<Long> bufferedDurationMs,
+            Metric<Long> bandwidthBitsPerSecond,
+            Metric<Long> mediaBitrateBitsPerSecond,
+            Metric<Float> renderedFrameRate,
+            Metric<Long> droppedFrames,
+            Metric<Integer> rebufferCount,
+            Metric<Long> rebufferTotalMs,
+            Metric<Long> firstFrameElapsedMs,
+            Metric<Long> liveLagMs) {
 
-        public RuntimeObservation(Metric<PlaybackPhase> phase, Metric<Boolean> playing,
-                                  Metric<Long> position, Metric<Long> duration, Metric<Long> buffered,
-                                  Metric<Long> bandwidth, Metric<Long> mediaBitrate,
-                                  Metric<Float> renderedFrameRate, Metric<Long> droppedFrames,
-                                  Metric<Integer> rebufferCount, Metric<Long> rebufferTotalMs,
-                                  Metric<Long> firstFrameMs, Metric<Long> liveLagMs) {
-            this.phase = phase == null ? Metric.unknown() : phase;
-            this.playing = playing == null ? Metric.unknown() : playing;
-            this.position = position == null ? Metric.unknown() : position;
-            this.duration = duration == null ? Metric.unknown() : duration;
-            this.buffered = buffered == null ? Metric.unknown() : buffered;
-            this.bandwidth = bandwidth == null ? Metric.unknown() : bandwidth;
-            this.mediaBitrate = mediaBitrate == null ? Metric.unknown() : mediaBitrate;
-            this.renderedFrameRate = renderedFrameRate == null ? Metric.unknown() : renderedFrameRate;
-            this.droppedFrames = droppedFrames == null ? Metric.unknown() : droppedFrames;
-            this.rebufferCount = rebufferCount == null ? Metric.unknown() : rebufferCount;
-            this.rebufferTotalMs = rebufferTotalMs == null ? Metric.unknown() : rebufferTotalMs;
-            this.firstFrameMs = firstFrameMs == null ? Metric.unknown() : firstFrameMs;
-            this.liveLagMs = liveLagMs == null ? Metric.unknown() : liveLagMs;
+        public RuntimeObservation {
+            phase = phase == null ? Metric.unknown() : phase;
+            loading = loading == null ? Metric.unknown() : loading;
+            positionMs = positionMs == null ? Metric.unknown() : positionMs;
+            durationMs = durationMs == null ? Metric.unknown() : durationMs;
+            bufferedDurationMs = bufferedDurationMs == null ? Metric.unknown() : bufferedDurationMs;
+            bandwidthBitsPerSecond = bandwidthBitsPerSecond == null ? Metric.unknown() : bandwidthBitsPerSecond;
+            mediaBitrateBitsPerSecond = mediaBitrateBitsPerSecond == null ? Metric.unknown() : mediaBitrateBitsPerSecond;
+            renderedFrameRate = renderedFrameRate == null ? Metric.unknown() : renderedFrameRate;
+            droppedFrames = droppedFrames == null ? Metric.unknown() : droppedFrames;
+            rebufferCount = rebufferCount == null ? Metric.unknown() : rebufferCount;
+            rebufferTotalMs = rebufferTotalMs == null ? Metric.unknown() : rebufferTotalMs;
+            firstFrameElapsedMs = firstFrameElapsedMs == null ? Metric.unknown() : firstFrameElapsedMs;
+            liveLagMs = liveLagMs == null ? Metric.unknown() : liveLagMs;
         }
 
-        public Metric<PlaybackPhase> phase() {
-            return phase;
+        public static RuntimeObservation unknown() {
+            return new RuntimeObservation(Metric.unknown(), Metric.unknown(), Metric.unknown(), Metric.unknown(),
+                    Metric.unknown(), Metric.unknown(), Metric.unknown(), Metric.unknown(), Metric.unknown(),
+                    Metric.unknown(), Metric.unknown(), Metric.unknown(), Metric.unknown());
+        }
+    }
+
+    public enum DecisionDomain {
+        NETWORK_PROTECTION("network-protection"),
+        THROUGHPUT("throughput"),
+        MPV_OUTPUT("mpv-output"),
+        MPV_CACHE("mpv-cache"),
+        MPV_FORWARD_CACHE("mpv-forward-cache"),
+        MPV_BACK_CACHE("mpv-back-cache"),
+        MPV_RESOURCE_PRESSURE("mpv-resource-pressure"),
+        MPV_HLS_VARIANT("mpv-hls-variant"),
+        MPV_PRELOAD("mpv-preload"),
+        IJK_BUFFER("ijk-buffer"),
+        IJK_REALTIME_RECOVERY("ijk-realtime-recovery"),
+        IJK_DECODE_PRESSURE("ijk-decode-pressure"),
+        IJK_RUNTIME_PROFILE("ijk-runtime-profile"),
+        DISPLAY_MODE("display-mode"),
+        TUNNELING("tunneling"),
+        LOAD_CONTROL("load-control"),
+        PRELOAD("preload"),
+        CACHE("cache"),
+        DECODE("decode"),
+        RTSP_LIVE_RECOVERY("rtsp-live-recovery"),
+        OTHER("other");
+
+        private final String label;
+
+        DecisionDomain(String label) {
+            this.label = label;
         }
 
-        public Metric<Boolean> playing() {
-            return playing;
+        public String label() {
+            return label;
+        }
+    }
+
+    public enum DecisionOutcome {
+        REQUESTED("requested"),
+        APPLIED("applied"),
+        SELECTED("selected"),
+        HELD("held"),
+        SUPPRESSED("suppressed"),
+        FAILED("failed"),
+        OBSERVED("observed");
+
+        private final String label;
+
+        DecisionOutcome(String label) {
+            this.label = label;
         }
 
-        public Metric<Long> positionMs() {
-            return position;
+        public String label() {
+            return label;
+        }
+    }
+
+    public record DecisionInput(String name, String value,
+                                PlaybackAutoContext.ValueSource source,
+                                PlaybackAutoContext.Confidence confidence) {
+
+        public DecisionInput {
+            name = safeName(name);
+            value = safeValue(value);
+            source = source == null ? PlaybackAutoContext.ValueSource.UNKNOWN : source;
+            confidence = confidence == null ? PlaybackAutoContext.Confidence.UNKNOWN : confidence;
+            if ("unknown".equals(name) || "unknown".equals(value)
+                    || source == PlaybackAutoContext.ValueSource.UNKNOWN
+                    || confidence == PlaybackAutoContext.Confidence.UNKNOWN) {
+                value = "unknown";
+                source = PlaybackAutoContext.ValueSource.UNKNOWN;
+                confidence = PlaybackAutoContext.Confidence.UNKNOWN;
+            }
         }
 
-        public Metric<Long> durationMs() {
-            return duration;
+        public static DecisionInput text(String name, String value,
+                                         PlaybackAutoContext.ValueSource source,
+                                         PlaybackAutoContext.Confidence confidence) {
+            return new DecisionInput(name, value, source, confidence);
         }
 
-        public Metric<Long> bufferedDurationMs() {
-            return buffered;
+        public static DecisionInput number(String name, long value,
+                                           PlaybackAutoContext.ValueSource source,
+                                           PlaybackAutoContext.Confidence confidence) {
+            return new DecisionInput(name, Long.toString(value), source, confidence);
         }
 
-        public Metric<Long> bandwidthBitsPerSecond() {
-            return bandwidth;
+        public static DecisionInput decimal(String name, double value,
+                                            PlaybackAutoContext.ValueSource source,
+                                            PlaybackAutoContext.Confidence confidence) {
+            if (!Double.isFinite(value)) return unknown(name);
+            return new DecisionInput(name, String.format(Locale.US, "%.3f", value), source, confidence);
         }
 
-        public Metric<Long> mediaBitrateBitsPerSecond() {
-            return mediaBitrate;
+        public static DecisionInput bool(String name, boolean value,
+                                         PlaybackAutoContext.ValueSource source,
+                                         PlaybackAutoContext.Confidence confidence) {
+            return new DecisionInput(name, Boolean.toString(value), source, confidence);
         }
 
-        public Metric<Float> renderedFrameRate() {
-            return renderedFrameRate;
+        public static DecisionInput unknown(String name) {
+            return new DecisionInput(name, "unknown", PlaybackAutoContext.ValueSource.UNKNOWN,
+                    PlaybackAutoContext.Confidence.UNKNOWN);
         }
 
-        public Metric<Long> droppedFrames() {
-            return droppedFrames;
+        private static String safeName(String value) {
+            String normalized = value == null ? "" : value.trim().toLowerCase(Locale.US);
+            if (normalized.length() == 0 || normalized.length() > 48) return "unknown";
+            for (int i = 0; i < normalized.length(); i++) {
+                char c = normalized.charAt(i);
+                if (Character.isLetterOrDigit(c) || c == '.' || c == '_' || c == '-') continue;
+                return "unknown";
+            }
+            return normalized;
         }
 
-        public Metric<Integer> rebufferCount() {
-            return rebufferCount;
+        private static String safeValue(String value) {
+            String normalized = value == null ? "" : value.trim();
+            if (normalized.length() == 0 || normalized.length() > 96
+                    || normalized.contains("://") || normalized.contains("/")
+                    || normalized.contains("\\") || normalized.contains("?")
+                    || normalized.contains("@") || normalized.contains("=")
+                    || normalized.contains("&") || normalized.contains("%")) return "unknown";
+            for (int i = 0; i < normalized.length(); i++) {
+                char c = normalized.charAt(i);
+                if (Character.isLetterOrDigit(c) || c == '.' || c == '_' || c == '-'
+                        || c == '+' || c == ':' || c == ',' || c == ' ' || c == '(' || c == ')') continue;
+                return "unknown";
+            }
+            return normalized;
+        }
+    }
+
+    public record DecisionEvent(
+            DecisionDomain domain,
+            DecisionOutcome outcome,
+            String oldValue,
+            String targetValue,
+            String resultValue,
+            String reason,
+            String suppressionReason,
+            List<DecisionInput> inputs) {
+
+        public DecisionEvent {
+            domain = domain == null ? DecisionDomain.OTHER : domain;
+            outcome = outcome == null ? DecisionOutcome.OBSERVED : outcome;
+            oldValue = DecisionInput.safeValue(oldValue);
+            targetValue = DecisionInput.safeValue(targetValue);
+            resultValue = DecisionInput.safeValue(resultValue);
+            reason = DecisionInput.safeValue(reason);
+            suppressionReason = DecisionInput.safeValue(suppressionReason);
+            List<DecisionInput> bounded = new ArrayList<>();
+            if (inputs != null) {
+                for (DecisionInput input : inputs) {
+                    if (input != null && bounded.size() < 12) bounded.add(input);
+                }
+            }
+            inputs = Collections.unmodifiableList(bounded);
         }
 
-        public Metric<Long> rebufferTotalMs() {
-            return rebufferTotalMs;
+        public String semanticKey() {
+            return domain.label() + "|" + outcome.label() + "|" + oldValue + "|" + targetValue
+                    + "|" + resultValue + "|" + reason + "|" + suppressionReason;
         }
+    }
 
-        public Metric<Long> firstFrameMs() {
-            return firstFrameMs;
+    public record LogEntry(String tag, String traceId, String message) {
+        public LogEntry {
+            tag = tag == null || tag.isBlank() ? "playback-telemetry" : tag;
+            traceId = PlaybackTrace.normalize(traceId);
+            message = message == null ? "" : message;
         }
+    }
 
-        public Metric<Long> liveLagMs() {
-            return liveLagMs;
-        }
+    public record SessionSummary(
+            String traceId,
+            String reason,
+            long durationMs,
+            long decisionEvaluations,
+            long decisionEmitted,
+            long decisionSuppressed,
+            long runtimeSamples,
+            long runtimeLogs,
+            long runtimeSuppressed,
+            long peakBufferedMs,
+            long maxDroppedFrames,
+            int rebufferCount,
+            long rebufferTotalMs) {
     }
 }

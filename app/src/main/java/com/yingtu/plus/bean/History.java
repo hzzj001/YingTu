@@ -44,6 +44,20 @@ public class History implements Serializable {
     public long updateTime;
 
     public History() {}
+
+    public int getCid() {
+        return cid;
+    }
+
+    public void setCid(int cid) {
+        this.cid = cid;
+    }
+
+    public History cid(int cid) {
+        setCid(cid);
+        return this;
+    }
+
     // 移植自上游 webhtv bean/History.java:116-138（HEAD 4e30ffa），供 SyncDialog 用；仅包名改名。
     public static List<History> get() {
         return get(VodConfig.getCid());

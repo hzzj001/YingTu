@@ -1,142 +1,217 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/main/java/com/fongmi/android/tv/player/PlaybackRoute.java，包名已改写为 com.yingtu.plus。
 package com.yingtu.plus.player;
 
-import java.util.Locale;
+import com.yingtu.plus.setting.PreloadSetting;
+import java.net.URI;
 
-/**
- * 兼容实现，待上游 webhtv 源码对齐。
- *
- * 播放链路（播放器取流走哪条路）：直连远端、经本地回环代理、经 App 内置服务、其他。
- * {@link Resolution} 是“按地址解析出的路由结论”，由 {@link PlaybackResourceClassifier}
- * 与各引擎共享；兼容实现按地址做最保守的分类：本地回环地址 → 回环路由，其余 → 直连远端，
- * 无法判断时返回 OTHER。
- */
 public enum PlaybackRoute {
+
     DIRECT_REMOTE_HTTP,
-    EXTERNAL_LOOPBACK_PROXY,
     APP_LOCAL_SERVICE,
+    EXTERNAL_LOOPBACK_PROXY,
     OTHER;
 
-    /** 路由的所有者。 */
-    public enum Owner implements PlaybackAutoContext.Labeled {
-        APP_MAIN_SERVER, APP_HLS_PROXY, UNKNOWN;
+    public static PlaybackRoute classify(String url) {
+        return resolve(url).route();
+    }
 
-        @Override
-        public String label() {
-            return name().toLowerCase(Locale.US);
+    public static Resolution resolve(String url) {
+        if (url == null || url.isBlank()) return new Resolution(OTHER, Owner.UNKNOWN, Evidence.EMPTY_URL, Confidence.UNKNOWN, "none", false, Location.UNKNOWN);
+        try {
+            URI uri = URI.create(url);
+            String scheme = uri.getScheme();
+            if (isLocalScheme(scheme)) return new Resolution(OTHER, Owner.UNKNOWN, Evidence.LOCAL_SCHEME, Confidence.CONFIRMED, safeScheme(scheme), false, Location.LOCAL);
+            if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) return new Resolution(OTHER, Owner.UNKNOWN, Evidence.NON_HTTP_SCHEME, Confidence.UNKNOWN, safeScheme(scheme), false, Location.UNKNOWN);
+            String host = uri.getHost();
+            if (host == null || host.isBlank()) return new Resolution(OTHER, Owner.UNKNOWN, Evidence.INVALID_HTTP_URL, Confidence.UNKNOWN, safeScheme(scheme), false, Location.UNKNOWN);
+            if (!isLoopback(host) && isPrivateHost(host)) return new Resolution(DIRECT_REMOTE_HTTP, Owner.REMOTE_ORIGIN, Evidence.PRIVATE_HOST, Confidence.CONFIRMED, safeScheme(scheme), false, Location.LAN_PRIVATE);
+            if (!isLoopback(host)) return new Resolution(DIRECT_REMOTE_HTTP, Owner.REMOTE_ORIGIN, Evidence.REMOTE_HOST, Confidence.CONFIRMED, safeScheme(scheme), false, Location.REMOTE);
+            PlaybackRouteRegistry.AppOwner appOwner = PlaybackRouteRegistry.findAppOwner(uri.getPort());
+            if (appOwner != null) return new Resolution(APP_LOCAL_SERVICE, owner(appOwner), Evidence.REGISTERED_APP_PORT, Confidence.CONFIRMED, safeScheme(scheme), true, Location.APP_INTERNAL_SERVICE);
+            return new Resolution(EXTERNAL_LOOPBACK_PROXY, Owner.EXTERNAL_OR_UNKNOWN_LOOPBACK, Evidence.UNREGISTERED_LOOPBACK_PORT, Confidence.INFERRED, safeScheme(scheme), true, Location.EXTERNAL_LOOPBACK);
+        } catch (IllegalArgumentException e) {
+            return new Resolution(OTHER, Owner.UNKNOWN, Evidence.INVALID_URL, Confidence.UNKNOWN, "other", false, Location.UNKNOWN);
         }
     }
 
-    /** 路由结论的证据（诊断日志用）。 */
-    public enum Evidence implements PlaybackAutoContext.Labeled {
-        DIRECT_REMOTE, EXTERNAL_LOOPBACK, LOCAL_SERVICE, UNKNOWN;
+    public int effectivePreloadThreads(int requestedThreads) {
+        int requested = Math.min(Math.max(requestedThreads, PreloadSetting.MIN_THREADS), PreloadSetting.MAX_THREADS);
+        return switch (this) {
+            case DIRECT_REMOTE_HTTP, APP_LOCAL_SERVICE -> requested;
+            case EXTERNAL_LOOPBACK_PROXY, OTHER -> PreloadSetting.MIN_THREADS;
+        };
+    }
 
-        @Override
-        public String label() {
-            return name().toLowerCase(Locale.US);
+    private static boolean isLoopback(String host) {
+        if (host == null) return false;
+        String normalized = host.trim().toLowerCase(java.util.Locale.US);
+        if (normalized.startsWith("[") && normalized.endsWith("]")) normalized = normalized.substring(1, normalized.length() - 1);
+        if (normalized.endsWith(".")) normalized = normalized.substring(0, normalized.length() - 1);
+        return "localhost".equals(normalized)
+                || "127.0.0.1".equals(normalized)
+                || "::1".equals(normalized)
+                || "0:0:0:0:0:0:0:1".equals(normalized);
+    }
+
+    private static boolean isLocalScheme(String scheme) {
+        return "file".equalsIgnoreCase(scheme)
+                || "content".equalsIgnoreCase(scheme)
+                || "asset".equalsIgnoreCase(scheme)
+                || "android.resource".equalsIgnoreCase(scheme)
+                || "data".equalsIgnoreCase(scheme);
+    }
+
+    /**
+     * Classifies only literal address ranges.  It intentionally does not resolve
+     * host names, so a host that cannot be proven private remains remote/unknown.
+     */
+    private static boolean isPrivateHost(String host) {
+        String normalized = host == null ? "" : host.trim().toLowerCase(java.util.Locale.US);
+        if (normalized.startsWith("[") && normalized.endsWith("]")) normalized = normalized.substring(1, normalized.length() - 1);
+        if (normalized.endsWith(".")) normalized = normalized.substring(0, normalized.length() - 1);
+        if (normalized.contains(":")) {
+            return normalized.startsWith("fc") || normalized.startsWith("fd")
+                    || normalized.startsWith("fe8") || normalized.startsWith("fe9")
+                    || normalized.startsWith("fea") || normalized.startsWith("feb");
+        }
+        String[] parts = normalized.split("\\.");
+        if (parts.length != 4) return false;
+        try {
+            int[] octets = new int[4];
+            for (int i = 0; i < parts.length; i++) {
+                octets[i] = Integer.parseInt(parts[i]);
+                if (octets[i] < 0 || octets[i] > 255) return false;
+            }
+            int first = octets[0];
+            int second = octets[1];
+            if (first == 10 || first == 127 || (first == 169 && second == 254) || (first == 192 && second == 168)) return true;
+            return first == 172 && second >= 16 && second <= 31;
+        } catch (NumberFormatException ignored) {
+            return false;
         }
     }
 
-    /** 按地址解析出的路由结论。 */
-    public static final class Resolution {
-        private PlaybackRoute route;
-        private Owner owner;
-        private Evidence evidence;
-        private PlaybackAutoContext.Confidence confidence;
-        private boolean loopback;
-        private String scheme;
+    private static Owner owner(PlaybackRouteRegistry.AppOwner owner) {
+        return switch (owner) {
+            case MAIN_SERVER -> Owner.APP_MAIN_SERVER;
+            case HLS_PROXY -> Owner.APP_HLS_PROXY;
+        };
+    }
 
-        private Resolution(PlaybackRoute route, Owner owner, Evidence evidence,
-                           PlaybackAutoContext.Confidence confidence, boolean loopback, String scheme) {
-            this.route = route == null ? OTHER : route;
-            this.owner = owner == null ? Owner.UNKNOWN : owner;
-            this.evidence = evidence == null ? Evidence.UNKNOWN : evidence;
-            this.confidence = confidence == null ? PlaybackAutoContext.Confidence.UNKNOWN : confidence;
-            this.loopback = loopback;
-            this.scheme = scheme == null ? "" : scheme;
+    private static String safeScheme(String scheme) {
+        if ("http".equalsIgnoreCase(scheme)) return "http";
+        if ("https".equalsIgnoreCase(scheme)) return "https";
+        return scheme == null ? "none" : "other";
+    }
+
+    public enum Owner {
+        REMOTE_ORIGIN("remote-origin"),
+        APP_MAIN_SERVER("app-main-server"),
+        APP_HLS_PROXY("app-hls-proxy"),
+        EXTERNAL_OR_UNKNOWN_LOOPBACK("external-or-unknown-loopback"),
+        UNKNOWN("unknown");
+
+        private final String label;
+
+        Owner(String label) {
+            this.label = label;
         }
 
-        public static Resolution of(PlaybackRoute route) {
-            return new Resolution(route, Owner.UNKNOWN, Evidence.UNKNOWN,
-                    PlaybackAutoContext.Confidence.UNKNOWN, false, "");
+        public String label() {
+            return label;
+        }
+    }
+
+    public enum Evidence {
+        REMOTE_HOST("remote-host"),
+        PRIVATE_HOST("private-host"),
+        REGISTERED_APP_PORT("registered-app-port"),
+        UNREGISTERED_LOOPBACK_PORT("unregistered-loopback-port"),
+        LOCAL_SCHEME("local-scheme"),
+        NON_HTTP_SCHEME("non-http-scheme"),
+        INVALID_HTTP_URL("invalid-http-url"),
+        INVALID_URL("invalid-url"),
+        EMPTY_URL("empty-url");
+
+        private final String label;
+
+        Evidence(String label) {
+            this.label = label;
         }
 
-        public PlaybackRoute route() {
-            return route;
+        public String label() {
+            return label;
+        }
+    }
+
+    public enum Confidence {
+        CONFIRMED("confirmed"),
+        INFERRED("inferred"),
+        UNKNOWN("unknown");
+
+        private final String label;
+
+        Confidence(String label) {
+            this.label = label;
         }
 
-        public Owner owner() {
-            return owner;
+        public String label() {
+            return label;
+        }
+    }
+
+    public enum Location {
+        LOCAL("local"),
+        LAN_PRIVATE("lan-private"),
+        REMOTE("remote"),
+        APP_INTERNAL_SERVICE("app-internal-service"),
+        EXTERNAL_LOOPBACK("external-loopback"),
+        UNKNOWN("unknown");
+
+        private final String label;
+
+        Location(String label) {
+            this.label = label;
         }
 
-        public Evidence evidence() {
-            return evidence;
+        public String label() {
+            return label;
+        }
+    }
+
+    public record Resolution(PlaybackRoute route, Owner owner, Evidence evidence, Confidence confidence, String scheme, boolean loopback, Location location) {
+
+        public Resolution(PlaybackRoute route, Owner owner, Evidence evidence, Confidence confidence, String scheme, boolean loopback) {
+            this(route, owner, evidence, confidence, scheme, loopback, inferLocation(route));
         }
 
-        public PlaybackAutoContext.Confidence confidence() {
-            return confidence;
+        public Resolution {
+            route = route == null ? OTHER : route;
+            owner = owner == null ? Owner.UNKNOWN : owner;
+            evidence = evidence == null ? Evidence.INVALID_URL : evidence;
+            confidence = confidence == null ? Confidence.UNKNOWN : confidence;
+            scheme = scheme == null ? "none" : scheme;
+            location = location == null ? inferLocation(route) : location;
         }
 
-        public boolean loopback() {
-            return loopback;
-        }
-
-        public String scheme() {
-            return scheme;
+        private static Location inferLocation(PlaybackRoute route) {
+            if (route == null) return Location.UNKNOWN;
+            return switch (route) {
+                case APP_LOCAL_SERVICE -> Location.APP_INTERNAL_SERVICE;
+                case EXTERNAL_LOOPBACK_PROXY -> Location.EXTERNAL_LOOPBACK;
+                default -> Location.UNKNOWN;
+            };
         }
 
         public String logSummary() {
-            return "route=" + route.name().toLowerCase(Locale.US)
-                    + " owner=" + owner.label()
-                    + " evidence=" + evidence.label()
-                    + " loopback=" + loopback;
+            return "route=" + route +
+                    " owner=" + owner.label() +
+                    " evidence=" + evidence.label() +
+                    " confidence=" + confidence.label() +
+                    " scheme=" + scheme +
+                    " location=" + location.label() +
+                    " loopback=" + loopback +
+                    " " + PlaybackRouteCapabilities.resolve(this).logSummary();
         }
-
-        /** 复制一份可继续调整的结论（分类器用它微调路由后写回上下文）。 */
-        public Resolution buildUpon() {
-            return new Resolution(route, owner, evidence, confidence, loopback, scheme);
-        }
-
-        void setRoute(PlaybackRoute route) {
-            if (route != null) this.route = route;
-        }
-
-        void setOwner(Owner owner) {
-            if (owner != null) this.owner = owner;
-        }
-
-        void setEvidence(Evidence evidence) {
-            if (evidence != null) this.evidence = evidence;
-        }
-
-        void setConfidence(PlaybackAutoContext.Confidence confidence) {
-            if (confidence != null) this.confidence = confidence;
-        }
-
-        void setLoopback(boolean loopback) {
-            this.loopback = loopback;
-        }
-
-        void setScheme(String scheme) {
-            this.scheme = scheme == null ? "" : scheme;
-        }
-    }
-
-    /** 按播放地址解析路由；空地址返回 OTHER 结论。 */
-    public static Resolution resolve(String url) {
-        if (url == null || url.isEmpty()) return Resolution.of(OTHER);
-        String lower = url.toLowerCase(Locale.US);
-        String scheme = lower.contains("://") ? lower.substring(0, lower.indexOf("://")) : "";
-        boolean loopback = lower.contains("127.0.0.1") || lower.contains("localhost") || lower.contains("[::1]");
-        if (loopback) {
-            return new Resolution(EXTERNAL_LOOPBACK_PROXY, Owner.APP_MAIN_SERVER,
-                    Evidence.EXTERNAL_LOOPBACK, PlaybackAutoContext.Confidence.MEDIUM, true, scheme);
-        }
-        return new Resolution(DIRECT_REMOTE_HTTP, Owner.UNKNOWN,
-                Evidence.DIRECT_REMOTE, PlaybackAutoContext.Confidence.LOW, false, scheme);
-    }
-
-    /** 该路由下预加载可用的并行线程数（兼容实现：不限制，返回请求数）。 */
-    public int effectivePreloadThreads(int requested) {
-        return Math.max(0, requested);
     }
 }

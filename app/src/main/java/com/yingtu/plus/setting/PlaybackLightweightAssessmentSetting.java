@@ -1,18 +1,136 @@
+// 移植自上游 fish2018/webhtv (commit 4e30ffa)：app/src/main/java/com/fongmi/android/tv/setting/PlaybackLightweightAssessmentSetting.java，包名已改写为 com.yingtu.plus。
 package com.yingtu.plus.setting;
 
+import android.content.SharedPreferences;
+
+import com.yingtu.plus.player.PlaybackLightweightAssessmentPolicy;
 import com.yingtu.plus.player.PlaybackProfileAbCoordinator;
+import com.yingtu.plus.player.PlaybackProfileAbIdentity;
 import com.yingtu.plus.player.PlaybackProfileAbPolicy;
-import com.yingtu.plus.util.Prefers;
+import com.yingtu.plus.player.PlaybackProfileAbStore;
+import com.yingtu.plus.player.PlaybackTrace;
+import com.github.catvod.utils.Prefers;
 
-public class PlaybackLightweightAssessmentSetting {
-    public static boolean isEnrolled() { return Prefers.getBoolean("ab_enrolled", false); }
+import java.util.Map;
 
-    /** 轻量评估共用 PlaybackProfileAbCoordinator 单例（PlayerManager 要求该类型）。 */
-    public static PlaybackProfileAbCoordinator coordinator() { return PlaybackProfileAbCoordinator.process(); }
+/** Device-local V-06A enrollment, samples and report. */
+public final class PlaybackLightweightAssessmentSetting {
 
-    /** 与 PlaybackProfileAbSetting.getEnrollmentResolution() 同形（PlayerManager 要求该类型）。 */
-    public static PlaybackProfileAbPolicy.EnrollmentResolution getEnrollmentResolution() {
-        return new PlaybackProfileAbPolicy.EnrollmentResolution(isEnrolled(),
-                new PlaybackProfileAbPolicy.Enrollment(""));
+    public static final String KEY_SCHEMA =
+            "playback_experiment_lightweight_assessment_schema";
+    public static final String KEY_DEVICE =
+            "playback_experiment_lightweight_assessment_device";
+    public static final String KEY_ENABLED =
+            "playback_experiment_lightweight_assessment_enabled";
+    public static final String KEY_SAMPLES =
+            "playback_experiment_lightweight_assessment_samples_v1";
+
+    private PlaybackLightweightAssessmentSetting() {
+    }
+
+    public static PlaybackProfileAbPolicy.EnrollmentResolution
+    getEnrollmentResolution() {
+        Map<String, ?> values;
+        try {
+            values = Prefers.getPrefers().getAll();
+        } catch (Throwable ignored) {
+            values = Map.of();
+        }
+        return PlaybackProfileAbPolicy.resolveEnrollment(
+                new PlaybackProfileAbPolicy.RawEnrollment(
+                        values.get(KEY_SCHEMA),
+                        values.get(KEY_DEVICE),
+                        values.get(KEY_ENABLED)),
+                PlaybackProfileAbIdentity.currentDeviceDigest());
+    }
+
+    public static boolean isEnrolled() {
+        return getEnrollmentResolution().active();
+    }
+
+    public static boolean putEnrolled(boolean enabled) {
+        PlaybackProfileAbPolicy.EnrollmentResolution current =
+                getEnrollmentResolution();
+        if (current.status()
+                == PlaybackProfileAbPolicy.EnrollmentStatus.FUTURE_SCHEMA) {
+            return false;
+        }
+        try {
+            SharedPreferences.Editor editor = Prefers.getPrefers().edit();
+            if (!enabled) {
+                editor.remove(KEY_SCHEMA);
+                editor.remove(KEY_DEVICE);
+                editor.remove(KEY_ENABLED);
+            } else {
+                String deviceDigest =
+                        PlaybackProfileAbIdentity.currentDeviceDigest();
+                if (!PlaybackProfileAbIdentity.validDigest(deviceDigest)) {
+                    return false;
+                }
+                editor.putInt(
+                        KEY_SCHEMA,
+                        PlaybackProfileAbPolicy.CURRENT_SCHEMA_VERSION);
+                editor.putString(KEY_DEVICE, deviceDigest);
+                editor.putBoolean(KEY_ENABLED, true);
+            }
+            editor.apply();
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    public static PlaybackProfileAbStore store() {
+        return Holder.STORE;
+    }
+
+    public static PlaybackProfileAbCoordinator coordinator() {
+        return Holder.COORDINATOR;
+    }
+
+    public static PlaybackLightweightAssessmentPolicy.Report report(
+            long nowEpochMs) {
+        return PlaybackLightweightAssessmentPolicy.evaluate(
+                store().snapshotForDevice(
+                        nowEpochMs,
+                        PlaybackProfileAbIdentity.currentDeviceDigest()));
+    }
+
+    public static void clearReport() {
+        store().clear();
+    }
+
+    private static final class Holder {
+
+        private static final PlaybackProfileAbStore STORE =
+                new PlaybackProfileAbStore(new PreferencesBackend());
+        private static final PlaybackProfileAbCoordinator COORDINATOR =
+                new PlaybackProfileAbCoordinator(
+                        STORE,
+                        entry -> PlaybackTrace.log(
+                                "playback-lightweight-assessment",
+                                entry.traceId(),
+                                "%s",
+                                entry.message()),
+                        PlaybackLightweightAssessmentPolicy::resolveGroup);
+    }
+
+    private static final class PreferencesBackend
+            implements PlaybackProfileAbStore.Backend {
+
+        @Override
+        public String read() {
+            return Prefers.getString(KEY_SAMPLES);
+        }
+
+        @Override
+        public void write(String value) {
+            Prefers.put(KEY_SAMPLES, value);
+        }
+
+        @Override
+        public void clear() {
+            Prefers.remove(KEY_SAMPLES);
+        }
     }
 }

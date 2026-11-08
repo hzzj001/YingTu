@@ -76,6 +76,12 @@ android {
                            'lib/x86_64/libavcodec.so', 'lib/x86_64/libavutil.so',
                            'lib/x86_64/libswresample.so', 'lib/x86_64/libswscale.so']
         }
+        // 第 27 轮：jspecify 1.0.0 与 Bouncy Castle bcprov-jdk18on 1.79 都带了
+        // META-INF/versions/9/OSGI-INF/MANIFEST.MF，mergeDebugJavaResource 合并时冲突（Build #26）。
+        // 这只是个清单文件，运行时用不上，直接排除。
+        resources {
+            excludes += ['META-INF/versions/9/OSGI-INF/MANIFEST.MF']
+        }
     }
 }
 
